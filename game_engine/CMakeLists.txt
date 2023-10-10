@@ -9,3 +9,5 @@ target_include_directories(${GameEngineName}
 target_sources(${GameEngineName}
     PRIVATE ./source/main.cpp
 )
+
+add_subdirectory(ut)

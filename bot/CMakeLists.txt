@@ -9,3 +9,5 @@ target_include_directories(${BrdigeBotName}
 target_sources(${BrdigeBotName}
     PRIVATE ./source/main.cpp
 )
+
+add_subdirectory(ut)
