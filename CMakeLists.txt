@@ -3,6 +3,14 @@ project(Bridge_Bot)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(BOT_DIR Bot)
+set(GAME_ENGINE_DIR GameEngine)
+set(HUMAN_PLAYER_DIR HumanPlayer)
+
+set(BOT_EXEC_NAME Bot)
+set(GAME_ENGINE_EXEC_NAME GameEngine)
+set(HUMAN_PLAYER_EXEC_NAME HumanPlayer)
+
 add_compile_options(-Wall -Werror -pedantic)
 
 include(FetchContent)
@@ -14,6 +22,6 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(GTest)
 
-add_subdirectory(bot)
-add_subdirectory(game_engine)
-
+add_subdirectory(${BOT_DIR})
+add_subdirectory(${GAME_ENGINE_DIR})
+add_subdirectory(${HUMAN_PLAYER_DIR})
