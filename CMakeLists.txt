@@ -22,6 +22,8 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(GTest)
 
+add_subdirectory(external)
 add_subdirectory(${BOT_DIR})
 add_subdirectory(${GAME_ENGINE_DIR})
 add_subdirectory(${HUMAN_PLAYER_DIR})
+add_subdirectory(experiments)
