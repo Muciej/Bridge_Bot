@@ -1,5 +1,4 @@
 #pragma once
-#include "connection/SocketClient.hpp"
 #include <sockpp/tcp_connector.h>
 #include <commands/MultiThreadCommandContainer.hpp>
 #include <utility>
@@ -67,8 +66,8 @@ class TcpClient : public SocketClient
     }
 
     public:
-    TcpClient(MultiThreadCommandContainer* in, MultiThreadCommandContainer* out, const in_port_t& p, const std::string& h = "localhost") 
-        : SocketClient{in, out}, port{std::move(p)}, host{std::move(h)} {};
+    // TcpClient(MultiThreadCommandContainer* in, MultiThreadCommandContainer* out, const in_port_t& p, const std::string& h = "localhost") 
+    //     : SocketClient{in, out}, port{std::move(p)}, host{std::move(h)} {};
 
     void startConnection()
     {
@@ -89,6 +88,11 @@ class TcpClient : public SocketClient
 
         wrThr.detach();
         rdThr.detach();
+    }
+
+    void write(const std::string& msg)
+    {
+        
     }
 
     ~TcpClient()

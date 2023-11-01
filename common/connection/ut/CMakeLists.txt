@@ -1,9 +1,9 @@
 enable_testing()
 
-set(EXEC_NAME ut_${BOT_NAME})
+set(EXEC_NAME ut_${CONNECTION_LIB_NAME})
 
 set(SOURCES
-    tempTest.cpp
+    dummyTest.cpp
 )
 
 add_executable(${EXEC_NAME} ${SOURCES})
