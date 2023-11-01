@@ -1,4 +1,4 @@
-#include <GameManager.hpp>
+#include <GameEngine/GameManager.hpp>
 
 GameManager::GameManager()
 {

@@ -8,7 +8,7 @@
 #include <thread>
 #include <mutex>
 
-class TcpClient : public SocketClient
+class TcpClient
 {
     private:
     const in_port_t port;
@@ -23,8 +23,8 @@ class TcpClient : public SocketClient
         std::stringstream ss;
 
         while ((n = rdSock.read(buf, sizeof(buf))) > 0 && !shouldStop) {
-            std::scoped_lock lock{inMsgContainer->mutex};
-            inMsgContainer->pushCommand(std::string(buf, n));
+            // std::scoped_lock lock{inMsgContainer->mutex};
+            // inMsgContainer->pushCommand(std::string(buf, n));
         }
 
         if (n < 0) {
@@ -41,27 +41,27 @@ class TcpClient : public SocketClient
         std::string s;
         while(!shouldStop)
         {
-            std::scoped_lock lock{outMsgContainer->mutex};
-            while(outMsgContainer->popCommand(s))
-            {
-                if (wrSock.write(s) != (int) s.length()) 
-                {
-                    if (wrSock.last_error() == EPIPE) 
-                    {
-                        return;
-                    }
-                    else 
-                    {
-                        std::stringstream ss;
-                        ss << "Error writing to the TCP stream ["
-                           << wrSock.last_error()
-                           << "]: "
-                           << wrSock.last_error_str();
-                        throw std::runtime_error(ss.str());
-                    }
-                    break;
-                }
-            }
+            // std::scoped_lock lock{outMsgContainer->mutex};
+            // while(outMsgContainer->popCommand(s))
+            // {
+            //     if (wrSock.write(s) != (int) s.length()) 
+            //     {
+            //         if (wrSock.last_error() == EPIPE) 
+            //         {
+            //             return;
+            //         }
+            //         else 
+            //         {
+            //             std::stringstream ss;
+            //             ss << "Error writing to the TCP stream ["
+            //                << wrSock.last_error()
+            //                << "]: "
+            //                << wrSock.last_error_str();
+            //             throw std::runtime_error(ss.str());
+            //         }
+            //         break;
+            //     }
+            // }
         }
     }
 
@@ -83,11 +83,11 @@ class TcpClient : public SocketClient
             throw(std::runtime_error(ss.str()));
 	    }
 
-        std::thread rdThr(read_thr, std::move(conn.clone()));
-        std::thread wrThr(write_thr, std::move(conn.clone()));
+        // std::thread rdThr(read_thr, std::move(conn.clone()));
+        // std::thread wrThr(write_thr, std::move(conn.clone()));
 
-        wrThr.detach();
-        rdThr.detach();
+        // wrThr.detach();
+        // rdThr.detach();
     }
 
     void write(const std::string& msg)

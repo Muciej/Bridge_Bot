@@ -1,4 +1,4 @@
-#include <Player.hpp>
+#include <GameEngine/Player.hpp>
 
 bool Player::cardDrawed(const Suit& suit)
 {

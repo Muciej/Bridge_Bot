@@ -1,9 +1,6 @@
 #include <iostream>
-#include <GameManager.hpp>
-#include <connection/SocketClient.hpp>
+#include <GameEngine/GameManager.hpp>
 #include <connection/TcpClient.hpp>
-#include <commands/MultiThreadCommandContainer.hpp>
-#include <commands/QueueContainer.hpp>
 
 int main(){
 

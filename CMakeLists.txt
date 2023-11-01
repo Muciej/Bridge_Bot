@@ -3,6 +3,7 @@ project(BridgeSuite)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+cmake_policy(SET CMP0135 NEW)
 include(FetchContent)
 FetchContent_Declare(
   GTest

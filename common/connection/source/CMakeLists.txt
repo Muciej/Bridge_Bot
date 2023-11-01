@@ -9,6 +9,11 @@ target_include_directories(${CONNECTION_LIB_NAME} INTERFACE ../include)
 
 # target_compile_features(${CONNECTION_LIB_NAME} PUBLIC cxx_std_17)
 
+target_link_libraries(${CONNECTION_LIB_NAME} INTERFACE
+  sockpp
+  commands1
+)
+
 source_group(
   TREE "${PROJECT_SOURCE_DIR}/include"
   PREFIX "Header Files"
