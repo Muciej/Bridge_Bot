@@ -1,17 +1,19 @@
-#include <MultiThreadCommandContainer.hpp>
-#include <QueueContainer.hpp>
+#include <commands/MultiThreadCommandContainer.hpp>
+#include <commands/QueueContainer.hpp>
+#include <iostream>
+#include <sstream>
 
-void QueueContainer::pushCommand(std::string&& command) override
+void QueueContainer::pushCommand(std::string&& command)
 {
     queue.emplace(command);
 }
 
-void QueueContainer::pushCommand(std::string& command) override
+void QueueContainer::pushCommand(std::string& command)
 {
     queue.emplace(std::move(command));
 }
 
-bool QueueContainer::popCommand(std::string& c) override
+bool QueueContainer::popCommand(std::string& c)
 {
     auto isEmpty = queue.empty();
     if (!isEmpty)
@@ -22,7 +24,7 @@ bool QueueContainer::popCommand(std::string& c) override
     return !isEmpty;
 }
 
-bool QueueContainer::isEmpty() override
+bool QueueContainer::isEmpty()
 {
     return queue.empty();
 }

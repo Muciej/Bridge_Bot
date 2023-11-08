@@ -9,10 +9,10 @@ set(SOURCES
 
 add_executable(${GAME_ENGINE_NAME} ${SOURCES})
 
-target_include_directories(${GAME_ENGINE_NAME} PUBLIC ../include)
-target_compile_features(${GAME_ENGINE_NAME} PRIVATE cxx_std_17)
+target_include_directories(${GAME_ENGINE_NAME} PRIVATE ../include)
 
 target_link_libraries( ${GAME_ENGINE_NAME} PRIVATE
+    compiler_flags
     connection
     commands
 )

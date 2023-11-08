@@ -6,5 +6,9 @@ set(SOURCES
 
 add_executable(${HUMAN_PLAYER_NAME} ${SOURCES})
 
-target_include_directories(${HUMAN_PLAYER_NAME} PUBLIC ../include)
-target_compile_features(${HUMAN_PLAYER_NAME} PRIVATE cxx_std_17)
+target_include_directories(${HUMAN_PLAYER_NAME} PRIVATE ../include)
+target_link_libraries(${HUMAN_PLAYER_NAME} PRIVATE
+    compiler_flags    
+    connection
+)
+

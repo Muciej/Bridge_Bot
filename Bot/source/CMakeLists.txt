@@ -4,7 +4,10 @@ set(SOURCES
     main.cpp
 )
 
-add_executable(${BOT_NAME} ${SOURCES})
+add_executable(${BOT_NAME} ${SOURCES} ${HEADER_LIST})
 
-target_include_directories(${BOT_NAME} PUBLIC ../include)
-target_compile_features(${BOT_NAME} PRIVATE cxx_std_17)
+target_include_directories(${BOT_NAME} PRIVATE ../include)
+target_link_libraries(${BOT_NAME} PRIVATE
+    compiler_flags
+    commands
+)

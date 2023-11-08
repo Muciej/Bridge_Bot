@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 project(BridgeSuite)
 
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+add_library(compiler_flags INTERFACE)
+target_compile_features(compiler_flags INTERFACE cxx_std_17)
+set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
+target_compile_options(compiler_flags INTERFACE
+  "$<${gcc_like_cxx}:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>"
+)
 
 cmake_policy(SET CMP0135 NEW)
 include(FetchContent)
@@ -15,7 +20,7 @@ FetchContent_MakeAvailable(GTest)
 
 add_subdirectory(common)
 add_subdirectory(external)
-add_subdirectory(GameEngine)
-add_subdirectory(HumanPlayer)
+# add_subdirectory(GameEngine)
+# add_subdirectory(HumanPlayer)
 add_subdirectory(Bot)
-add_subdirectory(experiments)
+# add_subdirectory(experiments)
