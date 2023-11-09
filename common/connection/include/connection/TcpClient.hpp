@@ -20,7 +20,7 @@ class TcpClient
     void write_thr(sockpp::tcp_socket wrSock);
 
     public:
-    startConnection();
-    write(const std::string& msg);
+    void startConnection();
+    void write(const std::string& msg);
     ~TcpClient();
 };

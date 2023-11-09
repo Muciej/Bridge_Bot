@@ -7,8 +7,9 @@ set(SOURCES
 add_executable(${HUMAN_PLAYER_NAME} ${SOURCES})
 
 target_include_directories(${HUMAN_PLAYER_NAME} PRIVATE ../include)
-target_link_libraries(${HUMAN_PLAYER_NAME} PRIVATE
+target_link_libraries(${HUMAN_PLAYER_NAME} PUBLIC
     compiler_flags    
     connection
+    commands
 )
 
