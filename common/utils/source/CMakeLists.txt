@@ -2,4 +2,4 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/${UTILS_L
 
 add_library(${UTILS_LIB_NAME} INTERFACE)
 
-target_include_directories(${UTILS_LIB_NAME} INTERFACE ../include)
+target_include_directories(${UTILS_LIB_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
