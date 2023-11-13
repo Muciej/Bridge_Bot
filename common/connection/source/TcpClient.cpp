@@ -1,84 +1,84 @@
 #include <connection/TcpClient.hpp>
+#include <thread>
 
-void TcpClient::read_thr(sockpp::tcp_socket rdSock)
+namespace connection
 {
-    char buf[512];
-    ssize_t n;
-    std::stringstream ss;
 
-    while ((n = rdSock.read(buf, sizeof(buf))) > 0 && !shouldStop) {
-        // std::scoped_lock lock{inMsgContainer->mutex};
-        // inMsgContainer->pushCommand(std::string(buf, n));
-    }
+TcpClient::TcpClient(ContainerPtr receive_container, ContainerPtr send_container) 
+    : received_commands(std::move(receive_container)), commands_to_send(std::move(send_container)) {};
 
-    if (n < 0) {
-        ss.clear();
-        ss << "Read error [" << rdSock.last_error() << "]: " 
-            << rdSock.last_error_str();
-        throw std::runtime_error(ss.str());
-    }
-    rdSock.shutdown();
-}
-
-void TcpClient::write_thr(sockpp::tcp_socket wrSock)
-{
-    std::string s;
-    while(!shouldStop)
-    {
-        // std::scoped_lock lock{outMsgContainer->mutex};
-        // while(outMsgContainer->popCommand(s))
-        // {
-        //     if (wrSock.write(s) != (int) s.length()) 
-        //     {
-        //         if (wrSock.last_error() == EPIPE) 
-        //         {
-        //             return;
-        //         }
-        //         else 
-        //         {
-        //             std::stringstream ss;
-        //             ss << "Error writing to the TCP stream ["
-        //                << wrSock.last_error()
-        //                << "]: "
-        //                << wrSock.last_error_str();
-        //             throw std::runtime_error(ss.str());
-        //         }
-        //         break;
-        //     }
-        // }
-    }
-}
-
-// TcpClient(MultiThreadCommandContainer* in, MultiThreadCommandContainer* out, const in_port_t& p, const std::string& h = "localhost") 
-//     : SocketClient{in, out}, port{std::move(p)}, host{std::move(h)} {};
-
-void TcpClient::startConnection()
+bool TcpClient::startConnection(const std::string& host, const in_port_t& port)
 {
     sockpp::initialize();
-    conn = sockpp::tcp_connector({host, port});
-    if (!conn) 
+
+    sockpp::tcp_connector connection({host, port});
+    if(!connection)
     {
-        std::stringstream ss;
-        ss << "Error connecting to server at "
-            << sockpp::inet_address(host, port)
-            << "\n\t" << conn.last_error_str() << std::endl;
-            
-        throw(std::runtime_error(ss.str()));
+        std::cerr << "Could not connect to server at"
+                  << sockpp::inet_address(host, port)
+                  << "\n\t" << connection.last_error_str() << std::endl;
+        return false;
     }
+    std::cout << "Connected to server on " << connection.address() << std::endl;
 
-    // std::thread rdThr(read_thr, std::move(conn.clone()));
-    // std::thread wrThr(write_thr, std::move(conn.clone()));
+    std::thread recThread( [this, &connection] { this->senderThread(connection.clone()); });
+    std::thread sendThread( [this, &connection] { this->receiverThread(std::move(connection)); });
 
-    // wrThr.detach();
-    // rdThr.detach();
+    sendThread.detach();
+    recThread.join();
+
+    return true;
 }
 
-void TcpClient::write(const std::string& msg)
+void TcpClient::sendCommand(const std::string& command)
 {
-    
+    std::scoped_lock{commands_to_send->mutex};
+    commands_to_send->pushCommand(command);
 }
 
-TcpClient::~TcpClient()
+bool TcpClient::popCommand(std::string& command)
 {
-    conn.shutdown();
+    std::scoped_lock{received_commands->mutex};
+    return received_commands->popCommand(command);
 }
+
+void TcpClient::senderThread(sockpp::stream_socket socket_stream)
+{
+    std::condition_variable send_condition;
+    std::string command;
+    while(true)
+    {
+        std::unique_lock lock{commands_to_send->mutex};
+        send_condition.wait(lock, [this] {return !this->commands_to_send->isEmpty(); });
+        commands_to_send->popCommand(command);
+        lock.unlock();
+        if(socket_stream.write(command) != (int) command.length())
+        {
+            if (socket_stream.last_error() == EPIPE) {
+                // todo DELETE DEBUG PRINT
+				std::cerr << "It appears that the socket was closed." << std::endl;
+			}
+			else {
+				std::cerr << "Error writing to the TCP stream ["
+					<< socket_stream.last_error() << "]: "
+					<< socket_stream.last_error_str() << std::endl;
+			}
+			break;
+        }
+    }
+}
+
+void TcpClient::receiverThread(sockpp::stream_socket socket_stream)
+{
+    char buf[256];
+    ssize_t n;
+
+    while ((n = socket_stream.read(buf, sizeof(buf))) > 0) 
+    {
+        std::scoped_lock{received_commands->mutex};
+        received_commands->pushCommand(std::string(buf, n));
+        std::cout << "Command received: " << std::string(buf, n) << std::endl;
+	}
+}
+
+};

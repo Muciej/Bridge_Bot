@@ -10,7 +10,7 @@ class QueueContainer : public MultiThreadCommandContainer
     
     public:
     void pushCommand(std::string&& command) override;
-    void pushCommand(std::string& command) override;
+    void pushCommand(const std::string& command) override;
     bool popCommand(std::string& c) override;
     bool isEmpty() override;
     std::string debugPrint();

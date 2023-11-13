@@ -2,6 +2,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/${CONNECT
 
 set(SOURCES
     TcpClient.cpp
+    TcpServer.cpp
 )
 
 add_library(${CONNECTION_LIB_NAME} ${SOURCES} ${HEADER_LIST})

@@ -8,7 +8,7 @@ void QueueContainer::pushCommand(std::string&& command)
     queue.emplace(command);
 }
 
-void QueueContainer::pushCommand(std::string& command)
+void QueueContainer::pushCommand(const std::string& command)
 {
     queue.emplace(std::move(command));
 }
