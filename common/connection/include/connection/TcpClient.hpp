@@ -9,35 +9,16 @@ namespace connection
 
 using ContainerPtr = std::unique_ptr<MultiThreadCommandContainer>;
 
-class Sender
-{
-    ContainerPtr commands_to_send;
-
-    public:
-    Sender(ContainerPtr container);
-
-    void operator()();
-};
-
-class Receiver
-{
-    private:
-    ContainerPtr received_commands;
-
-    public:
-    Receiver(ContainerPtr container);
-
-    void operator()();
-};
-
 class TcpClient
 {
     private:
     ContainerPtr received_commands;
     ContainerPtr commands_to_send;
     
-    void senderThread(sockpp::stream_socket socket_stream);
-    void receiverThread(sockpp::stream_socket socket_stream);
+    void senderThread(sockpp::tcp_socket socket);
+    void receiverThread(sockpp::tcp_socket socket);
+    
+    std::condition_variable send_condition;
 
     public:
     TcpClient(ContainerPtr receive_container, ContainerPtr send_container);
@@ -45,7 +26,6 @@ class TcpClient
     void sendCommand(const std::string& command);
     bool popCommand(std::string& command);
 
-    friend class std::condition_variable;
 };
 
 };

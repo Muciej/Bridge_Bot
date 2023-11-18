@@ -1,5 +1,6 @@
 #include <connection/TcpClient.hpp>
 #include <thread>
+#include <utility>
 
 namespace connection
 {
@@ -19,13 +20,13 @@ bool TcpClient::startConnection(const std::string& host, const in_port_t& port)
                   << "\n\t" << connection.last_error_str() << std::endl;
         return false;
     }
-    std::cout << "Connected to server on " << connection.address() << std::endl;
+    std::cout << "Connected to game server on " << connection.address() << std::endl;
 
-    std::thread recThread( [this, &connection] { this->senderThread(connection.clone()); });
-    std::thread sendThread( [this, &connection] { this->receiverThread(std::move(connection)); });
+    std::thread send_thr(&TcpClient::senderThread, this, std::move(connection.clone()));
+    std::thread read_thr(&TcpClient::receiverThread, this, std::move(connection));
 
-    sendThread.detach();
-    recThread.join();
+    send_thr.detach();
+    read_thr.detach();
 
     return true;
 }
@@ -34,6 +35,7 @@ void TcpClient::sendCommand(const std::string& command)
 {
     std::scoped_lock{commands_to_send->mutex};
     commands_to_send->pushCommand(command);
+    send_condition.notify_all();
 }
 
 bool TcpClient::popCommand(std::string& command)
@@ -42,9 +44,8 @@ bool TcpClient::popCommand(std::string& command)
     return received_commands->popCommand(command);
 }
 
-void TcpClient::senderThread(sockpp::stream_socket socket_stream)
+void TcpClient::senderThread(sockpp::tcp_socket socket)
 {
-    std::condition_variable send_condition;
     std::string command;
     while(true)
     {
@@ -52,32 +53,31 @@ void TcpClient::senderThread(sockpp::stream_socket socket_stream)
         send_condition.wait(lock, [this] {return !this->commands_to_send->isEmpty(); });
         commands_to_send->popCommand(command);
         lock.unlock();
-        if(socket_stream.write(command) != (int) command.length())
+        if(socket.write(command) != (int) command.length())
         {
-            if (socket_stream.last_error() == EPIPE) {
-                // todo DELETE DEBUG PRINT
+            if (socket.last_error() == EPIPE) {
 				std::cerr << "It appears that the socket was closed." << std::endl;
 			}
 			else {
 				std::cerr << "Error writing to the TCP stream ["
-					<< socket_stream.last_error() << "]: "
-					<< socket_stream.last_error_str() << std::endl;
+					<< socket.last_error() << "]: "
+					<< socket.last_error_str() << std::endl;
 			}
 			break;
         }
     }
+    socket.shutdown(SHUT_WR);
 }
 
-void TcpClient::receiverThread(sockpp::stream_socket socket_stream)
+void TcpClient::receiverThread(sockpp::tcp_socket socket)
 {
     char buf[256];
     ssize_t n;
 
-    while ((n = socket_stream.read(buf, sizeof(buf))) > 0) 
+    while ((n = socket.read(buf, sizeof(buf))) > 0) 
     {
         std::scoped_lock{received_commands->mutex};
         received_commands->pushCommand(std::string(buf, n));
-        std::cout << "Command received: " << std::string(buf, n) << std::endl;
 	}
 }
 

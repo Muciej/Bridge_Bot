@@ -40,8 +40,8 @@ void TcpServer::acceptorLoop()
         if (socket)
         {
             clients_write_sockets.push_back(std::move(socket.clone()));
-            std::thread client_thr( [this, &socket] { this->clientReader(std::move(socket.clone())); } );
-            client_thr.detach();
+            std::thread read_thr(&TcpServer::clientReader, this, std::move(socket));
+            read_thr.detach();
         } else
         {
             std::cerr << "Error accepting incoming connection: "
@@ -67,7 +67,7 @@ void TcpServer::clientReader(sockpp::tcp_socket socket)
 		std::cout << "Read error [" << socket.last_error() << "]: " 
 			<< socket.last_error_str() << std::endl;
 	}
-	socket.shutdown();    
+	socket.shutdown(SHUT_RDWR);    
 }
 
 void TcpServer::allClientSender()
