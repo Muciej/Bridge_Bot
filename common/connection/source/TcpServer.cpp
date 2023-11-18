@@ -4,12 +4,13 @@
 #include <thread>
 #include <functional>
 #include <mutex>
+#include <condition_variable>
 
 namespace connection
 {
 
-
-TcpServer::TcpServer(std::unique_ptr<MultiThreadCommandContainer> container) : commands_container(std::move(container)) {}
+TcpServer::TcpServer(ContainerPtr receive_container, ContainerPtr send_container) 
+    : received_commands(std::move(receive_container)), commands_to_send(std::move(send_container)) {};
 
 void TcpServer::startListening(const in_port_t& port)
 {
@@ -21,8 +22,10 @@ void TcpServer::startListening(const in_port_t& port)
 		std::cerr << "Error creating the acceptor: " << acceptor.last_error_str() << std::endl;
 	}
 	std::cout << "Started server on port " << port << "..." << std::endl;
-    std::thread thr( [this] {this->acceptorLoop();});
-    thr.detach();
+    std::thread acceptor_thr( [this] {this->acceptorLoop();});
+    std::thread all_sender_thr( [this] {this->allClientSender();});
+    acceptor_thr.detach();
+    all_sender_thr.detach();
 }
 
 void TcpServer::acceptorLoop()
@@ -36,9 +39,9 @@ void TcpServer::acceptorLoop()
 
         if (socket)
         {
-            // std::thread rd_thr( [this, &socket] { this->clientReader(socket.clone()); } );
-            clients_write_sockets.push_back(std::move(socket));
-            // rd_thr.detach();
+            clients_write_sockets.push_back(std::move(socket.clone()));
+            std::thread client_thr( [this, &socket] { this->clientReader(std::move(socket.clone())); } );
+            client_thr.detach();
         } else
         {
             std::cerr << "Error accepting incoming connection: "
@@ -54,8 +57,9 @@ void TcpServer::clientReader(sockpp::tcp_socket socket)
 
     while ((n = socket.read(buf, sizeof(buf))) > 0) 
     {
-        std::scoped_lock{commands_container->mutex};
-        commands_container->pushCommand(std::string(buf, n));
+        std::cout << "Received: " << std::string(buf, n) << std::endl;
+        std::scoped_lock{received_commands->mutex};
+        received_commands->pushCommand(std::string(buf, n));
 	}
 
 	if (n < 0) 
@@ -66,28 +70,42 @@ void TcpServer::clientReader(sockpp::tcp_socket socket)
 	socket.shutdown();    
 }
 
-void TcpServer::sendToAllClients(const std::string &command)
+void TcpServer::allClientSender()
 {
-    for(auto it = clients_write_sockets.begin(); it != clients_write_sockets.end(); it++)
+    std::string command;
+    while(true)
     {
-        // todo DELETE DEBUG PRINT
-        std::cout <<"Entering here?" << std::endl;
-        if(it->write(command) != (int) command.length())
+        std::unique_lock lock{commands_to_send->mutex};
+        send_condition.wait(lock, [this] { return !this->commands_to_send->isEmpty(); });
+        commands_to_send->popCommand(command);
+        lock.unlock();
+        for(auto it = clients_write_sockets.begin(); it != clients_write_sockets.end(); it++)
         {
-            clients_write_sockets.erase(it);
-            std::cerr << "Client connection closed" << std::endl;
-            if(it == clients_write_sockets.end())
+            if(it->write(command) != (int) command.length())
             {
-                return;
+                it->close();
+                it = clients_write_sockets.erase(it);
+                std::cerr << "Client connection closed" << std::endl;
             }
         }
     }
 }
 
-bool TcpServer::popCommand(std::string& command)
+void TcpServer::sendToAllClients(const std::string &command)
 {
-    std::scoped_lock{commands_container->mutex};
-    return commands_container->popCommand(command);
+    std::scoped_lock{commands_to_send->mutex};
+    commands_to_send->pushCommand(command);
+    send_condition.notify_all();
 }
 
+bool TcpServer::popCommand(std::string& command)
+{
+    std::scoped_lock{received_commands->mutex};
+    return received_commands->popCommand(command);
+}
+
+int TcpServer::getConnectedClientsNumber()
+{
+    return clients_write_sockets.size();
+}
 };

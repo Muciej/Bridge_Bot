@@ -7,7 +7,7 @@
 
 int main(){  
 
-    connection::TcpServer server(std::make_unique<QueueContainer>());
+    connection::TcpServer server(std::make_unique<QueueContainer>(), std::make_unique<QueueContainer>());
 
     server.startListening(12345);
 
@@ -15,7 +15,7 @@ int main(){
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         server.sendToAllClients("test");
-        std::cout << "send" << std::endl;
+        std::cout << "send, no of clients: " << server.getConnectedClientsNumber() << std::endl;
     }
 
     return 0;
