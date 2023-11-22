@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <utility>
-#include "CardsUtils.hpp"
 
 class Player
 {
@@ -11,9 +10,5 @@ class Player
     unsigned char const position;
 
     public:
-    Player() = default;
-    Player(const unsigned char& position, std::vector<unsigned char> h): hand{std::move(h)}, position{std::move(position)} {};
-
-    bool cardDrawed(const Suit& suit);
-    
+    Player() = default;    
 };
