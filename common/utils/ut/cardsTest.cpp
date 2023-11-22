@@ -2,9 +2,9 @@
 #include <gtest/gtest.h>
 #include <utils/Card.hpp>
 
-using Cards::Card;
-using Cards::Suit;
-using Cards::RoyalRank;
+using utils::Card;
+using utils::Suit;
+using utils::RoyalRank;
 
 TEST(CardsTest, DefaultContructorTest)
 {
