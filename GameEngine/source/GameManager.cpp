@@ -1,6 +1,6 @@
 #include <GameEngine/GameManager.hpp>
 
-GameManager::GameManager()
+void Game::GameManager::gameLoop(const connection::TcpServer &server)
 {
-    
+
 }

@@ -19,12 +19,14 @@ class TcpClient
     void receiverThread(sockpp::tcp_socket socket);
     
     std::condition_variable send_condition;
+    std::condition_variable receive_condition;
 
     public:
     TcpClient(ContainerPtr receive_container, ContainerPtr send_container);
     bool startConnection(const std::string& host, const in_port_t& port);
     void sendCommand(const std::string& command);
     bool popCommand(std::string& command);
+    std::string popCommandWait();
 
 };
 

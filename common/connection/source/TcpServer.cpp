@@ -60,6 +60,7 @@ void TcpServer::clientReader(sockpp::tcp_socket socket)
         std::cout << "Received: " << std::string(buf, n) << std::endl;
         std::scoped_lock{received_commands->mutex};
         received_commands->pushCommand(std::string(buf, n));
+        receive_condition.notify_all();
 	}
 
 	if (n < 0) 
@@ -102,6 +103,15 @@ bool TcpServer::popCommand(std::string& command)
 {
     std::scoped_lock{received_commands->mutex};
     return received_commands->popCommand(command);
+}
+
+std::string TcpServer::popCommandWait()
+{
+    std::unique_lock lock{received_commands->mutex};
+    receive_condition.wait(lock, [this] { return !this->received_commands->isEmpty(); });
+    std::string msg;
+    received_commands->popCommand(msg);
+    return msg;
 }
 
 int TcpServer::getConnectedClientsNumber()

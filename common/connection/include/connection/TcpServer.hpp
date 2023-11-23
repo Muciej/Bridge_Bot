@@ -21,6 +21,7 @@ class TcpServer
     ContainerPtr commands_to_send;
 
     std::condition_variable send_condition;
+    std::condition_variable receive_condition;
     std::list<sockpp::tcp_socket> clients_write_sockets;
     
     void acceptorLoop();
@@ -32,6 +33,7 @@ class TcpServer
     void startListening(const in_port_t& port);
     void sendToAllClients(const std::string& command);
     bool popCommand(std::string& command);
+    std::string popCommandWait();
     int getConnectedClientsNumber();
 };
 

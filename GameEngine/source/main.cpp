@@ -10,13 +10,11 @@ int main(){
     connection::TcpServer server(std::make_unique<QueueContainer>(), std::make_unique<QueueContainer>());
 
     server.startListening(12345);
+    std::cout << "Bridge game server started " << std::endl
+              << "waiting for players..." << std::endl;
 
-    while(true)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        server.sendToAllClients("test");
-        std::cout << "send, no of clients: " << server.getConnectedClientsNumber() << std::endl;
-    }
+    Game::GameManager manager;
+    manager.gameLoop(server);
 
     return 0;
 }

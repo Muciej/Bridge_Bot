@@ -44,6 +44,15 @@ bool TcpClient::popCommand(std::string& command)
     return received_commands->popCommand(command);
 }
 
+std::string TcpClient::popCommandWait()
+{
+    std::unique_lock lock{received_commands->mutex};
+    receive_condition.wait(lock, [this] { return !this->received_commands->isEmpty(); });
+    std::string msg;
+    received_commands->popCommand(msg);
+    return msg;
+}
+
 void TcpClient::senderThread(sockpp::tcp_socket socket)
 {
     std::string command;
