@@ -1,6 +1,5 @@
 # Build directory
 build/
-experiments/
 
 # VSC files
 .vscode/
