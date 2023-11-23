@@ -1,9 +1,9 @@
 #include <iostream>
-#include <thread>
-#include <chrono>
 #include <GameEngine/GameManager.hpp>
 #include <connection/TcpServer.hpp>
 #include <commands/QueueContainer.hpp>
+#include <GameEngine/Player.hpp>
+#include <vector>
 
 int main(){  
 

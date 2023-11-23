@@ -2,7 +2,6 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/${GAME_EN
 
 set(SOURCES
     main.cpp
-    Game.cpp
     GameManager.cpp
     Player.cpp
 )
