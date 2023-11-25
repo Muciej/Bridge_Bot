@@ -1,12 +1,14 @@
 #include <gtest/gtest.h>
 #include <GameEngine/GameManager.hpp>
+#include <connection/FakeServer.hpp>
 #include <utils/Player.hpp>
 #include <vector>
 #include <string>
+#include <memory>
 
 TEST(TestGameManger, ShouldAddPlayerTest)
 {
-    game::GameManager manager;
+    game::GameManager manager(std::make_unique<test::FakeServer>());
     manager.state = game::GameState::IN_LOBBY;
     manager.connected_players[0] = true;
     manager.connected_players[1] = false;
@@ -22,7 +24,7 @@ TEST(TestGameManger, ShouldAddPlayerTest)
 
 TEST(TestGameManger, AddPlayerWrongCommandFormatTest)
 {
-    game::GameManager manager;
+    game::GameManager manager(std::make_unique<test::FakeServer>());
     manager.state = game::GameState::IN_LOBBY;
     manager.connected_players[0] = true;
     manager.connected_players[1] = false;
@@ -33,7 +35,7 @@ TEST(TestGameManger, AddPlayerWrongCommandFormatTest)
 
 TEST(TestGameManger, AddPlayerAllSlotsOccupiedTest)
 {
-    game::GameManager manager;
+    game::GameManager manager(std::make_unique<test::FakeServer>());
     manager.state = game::GameState::IN_LOBBY;
     manager.connected_players[0] = true;
     manager.connected_players[1] = true;
@@ -46,7 +48,7 @@ TEST(TestGameManger, AddPlayerAllSlotsOccupiedTest)
 
 TEST(TestGameManger, AddPlayerWrongStateTest)
 {
-    game::GameManager manager;
+    game::GameManager manager(std::make_unique<test::FakeServer>());
     manager.state = game::GameState::BIDDING;
     manager.connected_players[0] = false;
 
@@ -56,7 +58,7 @@ TEST(TestGameManger, AddPlayerWrongStateTest)
 
 TEST(TestGameManger, AddFourPlayersTest)
 {
-    game::GameManager manager;
+    game::GameManager manager(std::make_unique<test::FakeServer>());
 
     std::vector<std::string> test_data1{"ADD_PLAYER", "JOHN", "PLAYER"};
     std::vector<std::string> test_data2{"ADD_PLAYER", "JACK", "BOT"};
@@ -67,7 +69,7 @@ TEST(TestGameManger, AddFourPlayersTest)
     manager.addPlayer(test_data3);
     manager.addPlayer(test_data4);
 
-    ASSERT_TRUE(manager.connected_players[1] && manager.connected_players[2] && manager.connected_players[3] && manager.connected_players[4]);
+    ASSERT_TRUE(manager.connected_players[0] && manager.connected_players[1] && manager.connected_players[2] && manager.connected_players[3]);
     ASSERT_EQ(manager.players[utils::Position::NORTH], utils::Player("JOHN", utils::Position::NORTH, false));
     ASSERT_EQ(manager.players[utils::Position::EAST], utils::Player("JACK", utils::Position::EAST, true));
     ASSERT_EQ(manager.players[utils::Position::SOUTH], utils::Player("ADA", utils::Position::SOUTH, false));

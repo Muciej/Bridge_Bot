@@ -1,17 +1,16 @@
 #pragma once
-#include <sockpp/tcp_acceptor.h>
-#include <commands/MultiThreadCommandContainer.hpp>
 #include <memory>
 #include <type_traits>
 #include <list>
 #include <condition_variable>
 
+#include <sockpp/tcp_acceptor.h>
+#include <connection/Server.hpp>
+
 namespace connection
 {
 
-using ContainerPtr = std::unique_ptr<MultiThreadCommandContainer>;
-
-class TcpServer
+class TcpServer : public Server
 {
     private:
     in_port_t server_port;
@@ -30,11 +29,11 @@ class TcpServer
 
     public:
     TcpServer(ContainerPtr receive_container, ContainerPtr send_container);
-    void startListening(const in_port_t& port);
-    void sendToAllClients(const std::string& command);
-    bool popCommand(std::string& command);
-    std::string popCommandWait();
-    int getConnectedClientsNumber();
+    void startListening(const in_port_t& port) override;
+    void sendToAllClients(const std::string& command) override;
+    bool popCommand(std::string& command) override;
+    std::string popCommandWait() override;
+    int getConnectedClientsNumber() override;
 };
 
 };

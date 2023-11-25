@@ -1,19 +1,20 @@
+#include <memory>
 #include <iostream>
+#include <vector>
 #include <GameEngine/GameManager.hpp>
 #include <connection/TcpServer.hpp>
 #include <commands/QueueContainer.hpp>
-#include <vector>
 
 int main(){  
 
-    connection::TcpServer server(std::make_unique<QueueContainer>(), std::make_unique<QueueContainer>());
+    auto server_ptr = std::make_unique<connection::TcpServer>(std::make_unique<QueueContainer>(), std::make_unique<QueueContainer>());
 
-    server.startListening(12345);
+    server_ptr->startListening(12345);
     std::cout << "Bridge game server started " << std::endl
               << "waiting for players..." << std::endl;
 
-    game::GameManager manager;
-    manager.gameLoop(server);
+    game::GameManager manager(std::move(server_ptr));
+    manager.gameLoop();
 
     return 0;
 }

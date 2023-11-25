@@ -23,14 +23,13 @@ const char * what () {
 };
 
 /// @brief Main game loop
-/// @param server - server object, must be started
-void GameManager::gameLoop(connection::TcpServer &server)
+void GameManager::gameLoop()
 {
     std::vector<std::string> command_data;
     std::string command_type;
     while(true)
     {
-        command_type = commands::parseCommand(server.popCommandWait(), command_data);
+        command_type = commands::parseCommand(server->popCommandWait(), command_data);
 
         if(command_type == "ADD_PLAYER")
             addPlayer(command_data);
@@ -101,8 +100,8 @@ void GameManager::playerMove(std::vector<std::string>& command_data)
 
 void GameManager::startBidding()
 {
-    now_moving == utils::Position::NORTH;
-    
+    now_moving = utils::Position::NORTH;
+    server->sendToAllClients(command_creator.serverGetStartBiddingCommand(utils::Position::NORTH));
 }
 
 };
