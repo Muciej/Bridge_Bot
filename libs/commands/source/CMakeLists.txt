@@ -2,6 +2,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/${COMMAND
 
 set(SOURCES
     QueueContainer.cpp
+    CommandsUtils.cpp
 )
 
 add_library(${COMMAND_LIB_NAME} ${SOURCES} ${HEADER_LIST})

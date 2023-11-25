@@ -3,6 +3,8 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/${UTILS_L
 set(SOURCES
     Bid.cpp
     Card.cpp
+    Player.cpp
+    Game.cpp
 )
 
 add_library(${UTILS_LIB_NAME} ${SOURCES} ${HEADER_LIST})

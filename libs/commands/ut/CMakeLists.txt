@@ -4,6 +4,7 @@ set(EXEC_NAME ut_${COMMAND_LIB_NAME})
 
 set(SOURCES
     testQueueContainer.cpp
+    testCommandsUtils.cpp
 )
 
 add_executable(${EXEC_NAME} ${SOURCES})

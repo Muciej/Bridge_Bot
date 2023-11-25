@@ -3,7 +3,7 @@
 #include <utility>
 #include <string>
 
-namespace Game
+namespace utils
 {
 
 enum Position
@@ -31,4 +31,4 @@ class Player
 
 bool operator==(const Player& lhs, const Player& rhs);
 
-};  // namespace Game
+};  // namespace utils

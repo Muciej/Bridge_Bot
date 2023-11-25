@@ -2,7 +2,6 @@
 #include <GameEngine/GameManager.hpp>
 #include <connection/TcpServer.hpp>
 #include <commands/QueueContainer.hpp>
-#include <GameEngine/Player.hpp>
 #include <vector>
 
 int main(){  
@@ -13,7 +12,7 @@ int main(){
     std::cout << "Bridge game server started " << std::endl
               << "waiting for players..." << std::endl;
 
-    Game::GameManager manager;
+    game::GameManager manager;
     manager.gameLoop(server);
 
     return 0;

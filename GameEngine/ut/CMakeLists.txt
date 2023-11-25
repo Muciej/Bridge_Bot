@@ -5,7 +5,6 @@ set(EXEC_NAME ut_${GAME_ENGINE_NAME})
 set(SOURCES
     testGameManager.cpp
     ../source/GameManager.cpp
-    ../source/Player.cpp
 )
 
 add_executable(${EXEC_NAME} ${SOURCES})
@@ -20,4 +19,5 @@ target_link_libraries(${EXEC_NAME}
     PRIVATE
         GTest::gtest_main
     connection
+    utils
 )

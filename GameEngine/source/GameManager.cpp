@@ -1,24 +1,24 @@
 #include <GameEngine/GameManager.hpp>
 #include <vector>
 #include <stdexcept>
+#include <commands/CommandsUtils.hpp>
 
-
-
-
-namespace Game
+namespace game
 {
 
 class WrongCommandException : public std::exception {
     public:
-char * what () {
-        return "Wrong command format!";
+const char * what () {
+        std::string msg("Wrong command format!");
+        return msg.c_str();
     }
 };
 
 class InvalidActionInCurrentStateException : public std::exception {
     public:
-char * what () {
-        return "This action is not permitted in this state!";
+const char * what () {
+        std::string msg("This action is not permitted in this state!");
+        return msg.c_str();
     }
 };
 
@@ -30,7 +30,7 @@ void GameManager::gameLoop(connection::TcpServer &server)
     std::string command_type;
     while(true)
     {
-        command_type = parseCommand(server.popCommandWait(), command_data);
+        command_type = commands::parseCommand(server.popCommandWait(), command_data);
 
         if(command_type == "ADD_PLAYER")
             addPlayer(command_data);
@@ -41,28 +41,6 @@ void GameManager::gameLoop(connection::TcpServer &server)
         else
             throw WrongCommandException();
     }
-}
-
-/// @brief Functions splits command into vector of string and returns first element
-/// which should be a command type
-/// @param command - command to split
-/// @param command_data - vector for result
-/// @return command type
-std::string GameManager::parseCommand(std::string command, std::vector<std::string>& command_data)
-{
-    command_data.clear();
-    size_t pos;
-
-    while ((pos = command.find(' ')) != std::string::npos) {
-        command_data.push_back(command.substr(0, pos));
-        command.erase(0, pos + 1);
-    }
-    if (command.length() > 0)
-    {
-        command_data.push_back(command);
-    }
-
-    return command_data.at(0);
 }
 
 /// @brief Adds new player to the game
@@ -87,10 +65,20 @@ void GameManager::addPlayer(std::vector<std::string>& command_data)
         } else
         {
             bool is_bot = command_data.at(2) == "BOT" ? true : false;
-            players[pos] = Player(command_data.at(1), Position(pos), is_bot);
+            players[pos] = utils::Player(command_data.at(1), utils::Position(pos), is_bot);
             connected_players[pos] = true;
-        }
 
+            bool should_start_bidding = true;
+            for(int i = 0; i<4; i++){
+                if(!connected_players[i])
+                    should_start_bidding = false;
+            }
+            if(should_start_bidding)
+            {
+                state = GameState::BIDDING;
+                startBidding();
+            }
+        }
 
     } else if (state != GameState::IN_LOBBY)
     {
@@ -103,12 +91,18 @@ void GameManager::addPlayer(std::vector<std::string>& command_data)
 
 void GameManager::playerBid(std::vector<std::string>& command_data)
 {
-
+    command_data.size();
 }
 
 void GameManager::playerMove(std::vector<std::string>& command_data)
 {
+    command_data.size();
+}
 
+void GameManager::startBidding()
+{
+    now_moving == utils::Position::NORTH;
+    
 }
 
 };

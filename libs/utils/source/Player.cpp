@@ -1,6 +1,6 @@
-#include <GameEngine/Player.hpp>
+#include <utils/Player.hpp>
 
-namespace Game
+namespace utils
 {
 
 bool operator==(const Player& lhs, const Player& rhs)
@@ -8,4 +8,4 @@ bool operator==(const Player& lhs, const Player& rhs)
     return lhs.name == rhs.name && lhs.position == rhs.position && lhs.is_bot == rhs.is_bot;
 }
 
-}; // namespace Game
+}; // namespace utils
