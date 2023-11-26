@@ -5,6 +5,9 @@ set(SOURCES
     Card.cpp
     Player.cpp
     Game.cpp
+    Bidding.cpp
+    Exceptions.cpp
+    Dealer.cpp
 )
 
 add_library(${UTILS_LIB_NAME} ${SOURCES} ${HEADER_LIST})

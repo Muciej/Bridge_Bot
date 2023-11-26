@@ -10,6 +10,7 @@ enum class Trump
     DIAMONDS = 1,
     HEARTS = 2,
     SPADES = 3,
+    NO_TRUMP = 4,
 };
 
 struct Bid

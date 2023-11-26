@@ -14,6 +14,7 @@ int main(){
               << "waiting for players..." << std::endl;
 
     game::GameManager manager(std::move(server_ptr));
+    manager.shouldPrintInfo = true;
     manager.gameLoop();
 
     return 0;

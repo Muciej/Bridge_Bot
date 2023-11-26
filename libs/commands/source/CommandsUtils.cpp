@@ -28,4 +28,18 @@ std::string parseCommand(std::string command, std::vector<std::string>& command_
     return command_data.at(0);
 }
 
+/// @brief Generates bid from command_data 
+/// @param command_data - split command
+/// @return bid created from command 
+/// bid command should have format:
+/// BID [ PLAYER_NAME ] SUIT/NT [ x ]
+/// where x is planned deal
+utils::Bid parseBidCommand(std::vector<std::string>& command_data)
+{
+    if (command_data.size() != 4)
+    {
+    
+    }
+}
+
 };

@@ -19,6 +19,8 @@ class CommandCreator
     string serverGetBidEndCommand(const utils::Position& position, const utils::Bid& deal);
     string serverGetPlayCommand(const utils::Position& position, const utils::Card& played_card);
     string serverGetGameEndCommand(const utils::Position& winner_1, const utils::Position& winner_2, int points_won);
+    string serverGetErrorMsgAllCommand(const string& msg);
+    string serverGetErrorMsgCommand(const utils::Position& position, const string& msg);
 };
 
 };

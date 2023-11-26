@@ -2,25 +2,33 @@
 #include <vector>
 #include <stdexcept>
 #include <commands/CommandsUtils.hpp>
+#include <commands/CommandCreator.hpp>
+#include <utils/Exceptions.hpp>
 
 namespace game
 {
+    
+using exception::InvalidActionInCurrentStateException;
+using exception::WrongCommandException;
+using exception::WrongPlayerNumberException;
 
-class WrongCommandException : public std::exception {
-    public:
-const char * what () {
-        std::string msg("Wrong command format!");
-        return msg.c_str();
+utils::Position GameManager::getPlayerPosition(std::string name)
+{
+    for(int i = 0; i<4; i++)
+    {
+        if(connected_players[i] && players[i].name == name)
+        {
+            return players[i].position;
+        }
     }
-};
+    //in case there is no such player
+    throw std::runtime_error("There is no player " + name + "!");
+}
 
-class InvalidActionInCurrentStateException : public std::exception {
-    public:
-const char * what () {
-        std::string msg("This action is not permitted in this state!");
-        return msg.c_str();
-    }
-};
+void GameManager::infoPrint(const std::string& msg)
+{
+    if(shouldPrintInfo) std::cout << msg << std::endl;
+}
 
 /// @brief Main game loop
 void GameManager::gameLoop()
@@ -66,15 +74,13 @@ void GameManager::addPlayer(std::vector<std::string>& command_data)
             bool is_bot = command_data.at(2) == "BOT" ? true : false;
             players[pos] = utils::Player(command_data.at(1), utils::Position(pos), is_bot);
             connected_players[pos] = true;
-
-            bool should_start_bidding = true;
-            for(int i = 0; i<4; i++){
-                if(!connected_players[i])
-                    should_start_bidding = false;
-            }
-            if(should_start_bidding)
+            infoPrint("Player " + command_data.at(1) + " connected!");
+            if(isGameFull())
             {
+                // TODO wygenerować/pobrać rozdanie
+                // TODO rozesłać rozdanie do graczy
                 state = GameState::BIDDING;
+                infoPrint("All players connected. Bidding has started!");
                 startBidding();
             }
         }
@@ -90,18 +96,56 @@ void GameManager::addPlayer(std::vector<std::string>& command_data)
 
 void GameManager::playerBid(std::vector<std::string>& command_data)
 {
-    command_data.size();
+    if (state != game::GameState::BIDDING)
+    {
+        throw InvalidActionInCurrentStateException();
+    } else if (!isGameFull())
+    {
+        throw WrongPlayerNumberException();
+    } else if (players[static_cast<int>(now_moving)].name != command_data[1])
+    {
+        std::string reply = command_creator.serverGetErrorMsgCommand(getPlayerPosition(command_data[1]), "It's not your move!");
+        server->sendToAllClients(reply);
+        return;
+    }
+
+    // all wrong situations checked, bid can be placed
+    auto bid = commands::parseBidCommand(command_data);
+    if(!bidding.addBid(getPlayerPosition(command_data[1]), bid))
+    {
+        std::string reply = command_creator.serverGetErrorMsgCommand(getPlayerPosition(command_data[1]), "Illegal bid!");
+        server->sendToAllClients(reply);
+    }
+
+    if(bidding.isBiddingEnded())
+    {
+        state = GameState::PLAYING;
+        // ustawić kontrakt w grze
+        // wysłać informację o ustawionym kontrakcie
+        // wysłać do graczy informacje o tym, kto jest pierwszy
+    }
 }
 
 void GameManager::playerMove(std::vector<std::string>& command_data)
 {
-    command_data.size();
+
 }
 
 void GameManager::startBidding()
 {
+    bidding.clear();
     now_moving = utils::Position::NORTH;
     server->sendToAllClients(command_creator.serverGetStartBiddingCommand(utils::Position::NORTH));
+}
+
+bool GameManager::isGameFull()
+{
+    bool game_full = true;
+    for(int i = 0; i<4; i++){
+        if(!connected_players[i])
+            game_full = false;
+    }
+    return game_full;
 }
 
 };

@@ -38,4 +38,14 @@ namespace commands
         return "";
     }
 
+    string CommandCreator::serverGetErrorMsgAllCommand(const string& msg)
+    {
+        return "";
+    }
+
+    string CommandCreator::serverGetErrorMsgCommand(const utils::Position& position, const string& msg)
+    {
+        return "";
+    }
+
 };

@@ -2,6 +2,7 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <utils/Card.hpp>
 
 namespace utils
 {
@@ -16,17 +17,15 @@ enum Position
 
 class Player
 {
-    private:
+    public:
     std::string name;
     unsigned int score = 0;
     Position position;
     bool is_bot;
+    std::vector<utils::Card> hand;
 
-    public:
     Player() = default;    
     Player(std::string n, Position pos, bool _is_bot) : name(std::move(n)), position(std::move(pos)), is_bot(_is_bot) {};
-
-    friend bool operator==(const Player& lhs, const Player& rhs);
 };
 
 bool operator==(const Player& lhs, const Player& rhs);
