@@ -2,12 +2,15 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/${UTILS_L
 
 set(SOURCES
     Bid.cpp
-    Card.cpp
-    Player.cpp
-    Game.cpp
     Bidding.cpp
-    Exceptions.cpp
+    Card.cpp
     Dealer.cpp
+    Exceptions.cpp
+    Game.cpp
+    MoveCorrectnessChecker.cpp
+    Player.cpp
+    Printer.cpp
+    Trick.cpp
 )
 
 add_library(${UTILS_LIB_NAME} ${SOURCES} ${HEADER_LIST})

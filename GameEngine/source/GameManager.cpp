@@ -98,16 +98,8 @@ void GameManager::addPlayer(std::vector<std::string>& command_data)
 
 void GameManager::playerBid(std::vector<std::string>& command_data)
 {
-    if (game.state != game::GameState::BIDDING)
+    if(!isCommandLegal(4, GameState::BIDDING, command_data[1], command_data))
     {
-        throw InvalidActionInCurrentStateException();
-    } else if (!isGameFull())
-    {
-        throw WrongPlayerNumberException();
-    } else if (players[static_cast<int>(game.now_moving)].name != command_data[1])
-    {
-        std::string reply = command_creator.serverGetErrorMsgCommand(getPlayerPosition(command_data[1]), "It's not your move!");
-        server->sendToAllClients(reply);
         return;
     }
 
@@ -130,8 +122,9 @@ void GameManager::playerBid(std::vector<std::string>& command_data)
 
 void GameManager::playerMove(std::vector<std::string>& command_data)
 {
-    if(!isCommandLegal(3, GameState::PLAYING, command_data[1]))
+    if(!isCommandLegal(3, GameState::PLAYING, command_data[1], command_data))
         return;
+
 
     // sprawdzić, czy gracz ma w ogóle taką kartę
     // sprawdzić, czy ruch legalny w obrębie trwającej lewy
@@ -193,7 +186,7 @@ void GameManager::startGame()
     game.state = GameState::PLAYING;
 }
 
-bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_state, const std::string& player_name)
+bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_state, const std::string& player_name, std::vector<std::string>& command_data)
 {
     if (game.state != required_state)
     {
@@ -201,6 +194,9 @@ bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_stat
     } else if (!isGameFull())
     {
         throw WrongPlayerNumberException();
+    } else if(command_data.size() != static_cast<long unsigned int>(desired_cmd_length))
+    {
+        throw WrongCommandException();
     } else if (players[static_cast<int>(game.now_moving)].name != player_name)
     {
         std::string reply = command_creator.serverGetErrorMsgCommand(getPlayerPosition(player_name), "It's not your move!");

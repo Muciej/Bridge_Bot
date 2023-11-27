@@ -40,7 +40,7 @@ class GameManager
     void infoPrint(const std::string& msg);
     utils::Position getPlayerPosition(std::string name);
     void generateAndSendDeck();
-    bool isCommandLegal(int desired_cmd_length, GameState required_state, const std::string& player_name);
+    bool isCommandLegal(int desired_cmd_length, GameState required_state, const std::string& player_name, std::vector<std::string>& command_data);
     void updateNowMoving();
 };
 
