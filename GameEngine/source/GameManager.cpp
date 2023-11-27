@@ -7,7 +7,7 @@
 
 namespace game
 {
-    
+
 using exception::InvalidActionInCurrentStateException;
 using exception::WrongCommandException;
 using exception::WrongPlayerNumberException;
@@ -38,6 +38,11 @@ void GameManager::gameLoop()
     while(true)
     {
         command_type = commands::parseCommand(server->popCommandWait(), command_data);
+        if(command_data.size() < 2)
+        {
+            infoPrint("Wrong format of command (too short)!");
+            continue;
+        }
 
         if(command_type == "ADD_PLAYER")
             addPlayer(command_data);
@@ -55,7 +60,7 @@ void GameManager::gameLoop()
 void GameManager::addPlayer(std::vector<std::string>& command_data)
 {
 
-    if(state == GameState::IN_LOBBY && command_data.size() == 3)
+    if(game.state == GameState::IN_LOBBY && command_data.size() == 3)
     {
         int pos = 0;
         while(pos < 4)
@@ -78,16 +83,14 @@ void GameManager::addPlayer(std::vector<std::string>& command_data)
             if(isGameFull())
             {
                 generateAndSendDeck();
-                state = GameState::BIDDING;
-                infoPrint("All players connected. Bidding has started!");
                 startBidding();
             }
         }
 
-    } else if (state != GameState::IN_LOBBY)
+    } else if (game.state != GameState::IN_LOBBY)
     {
         throw InvalidActionInCurrentStateException();
-    } else 
+    } else
     {
         throw WrongCommandException();
     }
@@ -95,13 +98,13 @@ void GameManager::addPlayer(std::vector<std::string>& command_data)
 
 void GameManager::playerBid(std::vector<std::string>& command_data)
 {
-    if (state != game::GameState::BIDDING)
+    if (game.state != game::GameState::BIDDING)
     {
         throw InvalidActionInCurrentStateException();
     } else if (!isGameFull())
     {
         throw WrongPlayerNumberException();
-    } else if (players[static_cast<int>(now_moving)].name != command_data[1])
+    } else if (players[static_cast<int>(game.now_moving)].name != command_data[1])
     {
         std::string reply = command_creator.serverGetErrorMsgCommand(getPlayerPosition(command_data[1]), "It's not your move!");
         server->sendToAllClients(reply);
@@ -114,26 +117,37 @@ void GameManager::playerBid(std::vector<std::string>& command_data)
     {
         std::string reply = command_creator.serverGetErrorMsgCommand(getPlayerPosition(command_data[1]), "Illegal bid!");
         server->sendToAllClients(reply);
+    } else
+    {
+        updateNowMoving();
     }
 
     if(bidding.isBiddingEnded())
     {
-        state = GameState::PLAYING;
-        // ustawić kontrakt w grze
-        // wysłać informację o ustawionym kontrakcie
-        // wysłać do graczy informacje o tym, kto jest pierwszy
+        startGame();
     }
 }
 
 void GameManager::playerMove(std::vector<std::string>& command_data)
 {
+    if(!isCommandLegal(3, GameState::PLAYING, command_data[1]))
+        return;
 
+    // sprawdzić, czy gracz ma w ogóle taką kartę
+    // sprawdzić, czy ruch legalny w obrębie trwającej lewy
+    // wykonać ruch i zaktualizować karty gracza
+    // wysłać informację o ruchu do innych graczy
+    // zmienić aktualnie ruszającą się osobę
+    // jeśli znowu declarer to podbić nr lewy
+    // sprawdzić, czy gra się przypadkiem nie skończyła
 }
 
 void GameManager::startBidding()
 {
+    game.state = GameState::BIDDING;
+    infoPrint("All players connected. Bidding has started!");
     bidding.clear();
-    now_moving = utils::Position::NORTH;
+    game.now_moving = utils::Position::NORTH;
     server->sendToAllClients(command_creator.serverGetStartBiddingCommand(utils::Position::NORTH));
 }
 
@@ -155,11 +169,51 @@ void GameManager::generateAndSendDeck()
     players[1].hand = hands[1];
     players[2].hand = hands[2];
     players[3].hand = hands[3];
-    
+
     server->sendToAllClients(command_creator.serverGetCardsInfoCommand(utils::Position::NORTH, players[utils::Position::NORTH].hand));
     server->sendToAllClients(command_creator.serverGetCardsInfoCommand(utils::Position::WEST, players[utils::Position::WEST].hand));
     server->sendToAllClients(command_creator.serverGetCardsInfoCommand(utils::Position::SOUTH, players[utils::Position::SOUTH].hand));
     server->sendToAllClients(command_creator.serverGetCardsInfoCommand(utils::Position::EAST, players[utils::Position::EAST].hand));
+}
+
+void GameManager::startGame()
+{
+    infoPrint("Bidding has ended, game started!");
+    auto contract = bidding.getContract();
+    if(!contract)   // 4 passes, game is ended
+    {
+        // TODO reload game
+        return;
+    }
+
+    game.contract = bidding.getContract().value();
+    game.declarer = bidding.getDeclarer().value();
+    game.now_moving = game.declarer;
+    server->sendToAllClients(command_creator.serverGetBidEndCommand(game.declarer, game.contract));
+    game.state = GameState::PLAYING;
+}
+
+bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_state, const std::string& player_name)
+{
+    if (game.state != required_state)
+    {
+        throw InvalidActionInCurrentStateException();
+    } else if (!isGameFull())
+    {
+        throw WrongPlayerNumberException();
+    } else if (players[static_cast<int>(game.now_moving)].name != player_name)
+    {
+        std::string reply = command_creator.serverGetErrorMsgCommand(getPlayerPosition(player_name), "It's not your move!");
+        server->sendToAllClients(reply);
+        return false;
+    }
+
+    return true;
+}
+
+void GameManager::updateNowMoving()
+{
+    game.now_moving = static_cast<utils::Position>((static_cast<int>(game.now_moving) + 1)%4);
 }
 
 };

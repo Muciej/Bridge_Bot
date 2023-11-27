@@ -9,7 +9,7 @@
 TEST(TestGameManger, ShouldAddPlayerTest)
 {
     game::GameManager manager(std::make_unique<test::FakeServer>());
-    manager.state = game::GameState::IN_LOBBY;
+    manager.game.state = utils::GameState::IN_LOBBY;
     manager.connected_players[0] = true;
     manager.connected_players[1] = false;
 
@@ -19,13 +19,13 @@ TEST(TestGameManger, ShouldAddPlayerTest)
     utils::Player p("JOHN", utils::Position::EAST, true);
     ASSERT_EQ(manager.players[utils::Position::EAST], p);
     ASSERT_TRUE(manager.connected_players[1]);
-    
+
 }
 
 TEST(TestGameManger, AddPlayerWrongCommandFormatTest)
 {
     game::GameManager manager(std::make_unique<test::FakeServer>());
-    manager.state = game::GameState::IN_LOBBY;
+    manager.game.state = utils::GameState::IN_LOBBY;
     manager.connected_players[0] = true;
     manager.connected_players[1] = false;
 
@@ -36,7 +36,7 @@ TEST(TestGameManger, AddPlayerWrongCommandFormatTest)
 TEST(TestGameManger, AddPlayerAllSlotsOccupiedTest)
 {
     game::GameManager manager(std::make_unique<test::FakeServer>());
-    manager.state = game::GameState::IN_LOBBY;
+    manager.game.state = utils::GameState::IN_LOBBY;
     manager.connected_players[0] = true;
     manager.connected_players[1] = true;
     manager.connected_players[2] = true;
@@ -49,7 +49,7 @@ TEST(TestGameManger, AddPlayerAllSlotsOccupiedTest)
 TEST(TestGameManger, AddPlayerWrongStateTest)
 {
     game::GameManager manager(std::make_unique<test::FakeServer>());
-    manager.state = game::GameState::BIDDING;
+    manager.game.state = utils::GameState::BIDDING;
     manager.connected_players[0] = false;
 
     std::vector<std::string> test_data{"ADD_PLAYER", "JOHN", "BOT"};
