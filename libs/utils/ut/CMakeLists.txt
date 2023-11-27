@@ -5,6 +5,8 @@ set(EXEC_NAME ut_${UTILS_LIB_NAME})
 set(SOURCES
     cardsTest.cpp
     bidTest.cpp
+    dealerTest.cpp
+    biddingTest.cpp
 )
 
 add_executable(${EXEC_NAME} ${SOURCES})

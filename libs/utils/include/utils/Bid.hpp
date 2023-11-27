@@ -11,15 +11,16 @@ enum class Trump
     HEARTS = 2,
     SPADES = 3,
     NO_TRUMP = 4,
+    PASS = 5,
 };
 
 struct Bid
 {
-    Trump trump;
-    int deal;
+    Trump trump = Trump::PASS;
+    int deal = 0;
 
     Bid() = default;
-    Bid(const Trump& s, const int& d);
+    Bid(const Trump& _trump, const int& _deal);
 
 };
 

@@ -13,7 +13,7 @@ class CommandCreator
 {
     public:
     string serverGetSetPositionCommand(const string& name, const utils::Position& position);
-    string serverGetCardsInfoCommand( /*TODO*/ );
+    string serverGetCardsInfoCommand(const utils::Position& position, std::vector<utils::Card>& hand);
     string serverGetStartBiddingCommand(const utils::Position& dealer_position);
     string serverGetBidInfoCommand(const utils::Position& position, const utils::Bid& bid);
     string serverGetBidEndCommand(const utils::Position& position, const utils::Bid& deal);

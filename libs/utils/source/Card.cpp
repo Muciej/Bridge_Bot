@@ -56,4 +56,9 @@ std::ostream& operator<<(std::ostream& stream, const Card& card)
     return stream;
 }
 
+bool operator==(const Card& lhs, const Card& rhs)
+{
+    return lhs.rank == rhs.rank && lhs.suit == rhs.suit;
+}
+
 };

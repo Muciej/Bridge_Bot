@@ -3,15 +3,15 @@
 namespace utils
 {
 
-Bid::Bid(const Trump& t, const int& d) : trump(t)
+Bid::Bid(const Trump& _trump, const int& _deal) : trump(_trump)
 {
-    if (d < 1 || d > 7)
+    if (_trump != Trump::PASS && (_deal < 1 || _deal > 7))
     {
         throw std::range_error("Wrong deal!");
     } else
     {
-        trump = t;
-        deal = d;
+        trump = _trump;
+        deal = _deal;
     }
 }
 

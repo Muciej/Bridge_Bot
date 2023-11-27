@@ -77,8 +77,7 @@ void GameManager::addPlayer(std::vector<std::string>& command_data)
             infoPrint("Player " + command_data.at(1) + " connected!");
             if(isGameFull())
             {
-                // TODO wygenerować/pobrać rozdanie
-                // TODO rozesłać rozdanie do graczy
+                generateAndSendDeck();
                 state = GameState::BIDDING;
                 infoPrint("All players connected. Bidding has started!");
                 startBidding();
@@ -146,6 +145,21 @@ bool GameManager::isGameFull()
             game_full = false;
     }
     return game_full;
+}
+
+void GameManager::generateAndSendDeck()
+{
+    dealer = utils::Dealer();
+    auto hands = dealer.dealCards();
+    players[0].hand = hands[0];
+    players[1].hand = hands[1];
+    players[2].hand = hands[2];
+    players[3].hand = hands[3];
+    
+    server->sendToAllClients(command_creator.serverGetCardsInfoCommand(utils::Position::NORTH, players[utils::Position::NORTH].hand));
+    server->sendToAllClients(command_creator.serverGetCardsInfoCommand(utils::Position::WEST, players[utils::Position::WEST].hand));
+    server->sendToAllClients(command_creator.serverGetCardsInfoCommand(utils::Position::SOUTH, players[utils::Position::SOUTH].hand));
+    server->sendToAllClients(command_creator.serverGetCardsInfoCommand(utils::Position::EAST, players[utils::Position::EAST].hand));
 }
 
 };

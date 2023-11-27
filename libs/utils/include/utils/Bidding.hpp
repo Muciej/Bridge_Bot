@@ -2,21 +2,27 @@
 #include <utils/Bid.hpp>
 #include <utils/Player.hpp>
 #include <vector>
+#include <optional>
 
 namespace utils
 {
 
-using PlayerBid = std::pair<utils::Position, Bid>;
-
 class Bidding
 {
+    private:
+    std::optional<int> highest_bid_index;
+    bool isBidLegal(const Bid& bid);
+    int getPassesStrike();
+    Position probable_declarer;
+
     public:
-    std::vector<PlayerBid> history;
+    std::vector<Bid> history;
     
-    bool addBid(const utils::Position& pos, const Bid& bid);
+    bool addBid(const Position& pos, const Bid& bid);
     bool isBiddingEnded();
     void clear();
-
+    std::optional<Position> getDeclarer();
+    std::optional<Bid> getContract();
 };
     
 };

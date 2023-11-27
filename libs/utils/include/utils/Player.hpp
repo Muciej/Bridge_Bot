@@ -15,6 +15,8 @@ enum Position
     WEST = 3
 };
 
+Position getPartnerPosition(const Position& pos);
+
 class Player
 {
     public:

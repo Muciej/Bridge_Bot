@@ -44,6 +44,7 @@ class GameManager
     bool isGameFull();
     void infoPrint(const std::string& msg);
     utils::Position getPlayerPosition(std::string name);
+    void generateAndSendDeck();
 };
 
 };

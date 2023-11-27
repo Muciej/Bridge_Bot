@@ -9,10 +9,10 @@ class Dealer
 {
     private:
     std::vector<utils::Card> deck;
+    void initializeDeck();
 
     public:
     Dealer();
-    void initializeDeck();
     void shuffleDeck();
     std::vector<std::vector<Card>> dealCards();
 };

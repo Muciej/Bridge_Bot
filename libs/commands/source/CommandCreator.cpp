@@ -8,7 +8,7 @@ namespace commands
         return "";
     }
 
-    string CommandCreator::serverGetCardsInfoCommand( /*TODO*/ )
+    string CommandCreator::serverGetCardsInfoCommand(const utils::Position& position, std::vector<utils::Card>& hand)
     {
         return "";
     }
