@@ -15,6 +15,13 @@ Position getPartnerPosition(const Position& pos)
     return static_cast<Position>((static_cast<int>(pos) + 2)%4);
 }
 
+std::pair<Position, Position> getEnemiesPositions(const Position& pos)
+{
+    auto pos1 = static_cast<Position>((static_cast<int>(pos) + 1)%4);
+    auto pos2 = static_cast<Position>((static_cast<int>(pos) + 3)%4);
+    return std::pair(pos1, pos2);
+}
+
 void Player::drawCard(Card to_draw)
 {
     auto newEnd = std::remove(hand.begin(), hand.end(), to_draw);

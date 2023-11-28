@@ -13,17 +13,18 @@ using exception::InvalidActionInCurrentStateException;
 using exception::WrongCommandException;
 using exception::WrongPlayerNumberException;
 
-utils::Position GameManager::getPlayerPosition(std::string name)
+utils::Position GameManager::getPositionFromString(const std::string& pos_string)
 {
-    for(int i = 0; i<4; i++)
-    {
-        if(connected_players[i] && players[i].name == name)
-        {
-            return players[i].position;
-        }
-    }
-    //in case there is no such player
-    throw std::runtime_error("There is no player " + name + "!");
+    utils::Position pos;
+    if(pos_string == "NORTH")
+        pos = utils::Position::NORTH;
+    else if(pos_string == "SOUTH")
+        pos = utils::Position::SOUTH;
+    else if(pos_string == "EAST")
+        pos = utils::Position::EAST;
+    else if(pos_string == "WEST")
+        pos = utils::Position::WEST;
+    return pos;
 }
 
 void GameManager::infoPrint(const std::string& msg)
@@ -36,7 +37,7 @@ void GameManager::gameLoop()
 {
     std::vector<std::string> command_data;
     std::string command_type;
-    while(true)
+    while(game.state != GameState::END)
     {
         command_type = commands::parseCommand(server->popCommandWait(), command_data);
         if(command_data.size() < 2)
@@ -106,13 +107,13 @@ void GameManager::playerBid(std::vector<std::string>& command_data)
 
     // all wrong situations checked, bid can be placed
     auto bid = commands::parseBidCommand(command_data);
-    if(!bidding.addBid(getPlayerPosition(command_data[1]), bid))
+    if(!bidding.addBid(getPositionFromString(command_data[1]), bid))
     {
-        std::string reply = command_creator.serverGetErrorMsgCommand(getPlayerPosition(command_data[1]), "Illegal bid!");
+        std::string reply = command_creator.serverGetErrorMsgCommand(getPositionFromString(command_data[1]), "Illegal bid!");
         server->sendToAllClients(reply);
     } else
     {
-        std::string reply = command_creator.serverGetBidInfoCommand(getPlayerPosition(command_data[1]), bid);
+        std::string reply = command_creator.serverGetBidInfoCommand(getPositionFromString(command_data[1]), bid);
         updateNowMoving();
     }
 
@@ -131,14 +132,18 @@ void GameManager::playerMove(std::vector<std::string>& command_data)
 
     if(!utils::isMoveLegal(players[game.now_moving], card, game.getCurentTrick()))
     {
-        std::string reply = command_creator.serverGetErrorMsgCommand(getPlayerPosition(command_data[1]), "You cannot play this card!");
+        std::string reply = command_creator.serverGetErrorMsgCommand(getPositionFromString(command_data[1]), "You cannot play this card!");
         server->sendToAllClients(reply);
         return;
     }
 
     players[game.now_moving].drawCard(card);
-    server->sendToAllClients(command_creator.serverGetPlayCommand(getPlayerPosition(command_data[1]), card));
-
+    if(game.now_moving == game.getCurentTrick().first)
+    {
+        game.tricks[game.current_trick].suit = card.suit;
+    }
+    server->sendToAllClients(command_creator.serverGetPlayCommand(getPositionFromString(command_data[1]), card));
+    infoPrint(command_creator.serverGetPlayCommand(getPositionFromString(command_data[1]), card));
     updateNowMoving();
     if (game.getCurentTrick().first == game.now_moving) // trick is ended
     {
@@ -149,7 +154,10 @@ void GameManager::playerMove(std::vector<std::string>& command_data)
     }
     if(game.current_trick == 13)  // game end
     {
-        // TODO end game, show results, restart
+        endGame();
+    } else
+    {
+        game.tricks[game.current_trick].first = game.now_moving;
     }
 }
 
@@ -158,7 +166,7 @@ void GameManager::startBidding()
     game.state = GameState::BIDDING;
     infoPrint("All players connected. Bidding has started!");
     bidding.clear();
-    game.now_moving = utils::Position::NORTH;
+    game.now_moving = bidder;
     server->sendToAllClients(command_creator.serverGetStartBiddingCommand(utils::Position::NORTH));
 }
 
@@ -193,13 +201,15 @@ void GameManager::startGame()
     auto contract = bidding.getContract();
     if(!contract)   // 4 passes, game is ended
     {
-        // TODO reload game
+        endGame();
         return;
     }
 
     game.contract = bidding.getContract().value();
     game.declarer = bidding.getDeclarer().value();
     game.now_moving = game.declarer;
+    game.current_trick = 0;
+    game.tricks[0].first = game.declarer;
     server->sendToAllClients(command_creator.serverGetBidEndCommand(game.declarer, game.contract));
     game.state = GameState::PLAYING;
 }
@@ -217,7 +227,7 @@ bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_stat
         throw WrongCommandException();
     } else if (players[static_cast<int>(game.now_moving)].name != player_name)
     {
-        std::string reply = command_creator.serverGetErrorMsgCommand(getPlayerPosition(player_name), "It's not your move!");
+        std::string reply = command_creator.serverGetErrorMsgCommand(getPositionFromString(player_name), "It's not your move!");
         server->sendToAllClients(reply);
         return false;
     }
@@ -228,6 +238,28 @@ bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_stat
 void GameManager::updateNowMoving()
 {
     game.now_moving = static_cast<utils::Position>((static_cast<int>(game.now_moving) + 1)%4);
+}
+
+void GameManager::updateBidder()
+{
+    bidder = static_cast<utils::Position>((static_cast<int>(game.now_moving) + 1)%4);
+}
+
+void GameManager::endGame()
+{
+    infoPrint("Game ended, sending score info");
+    auto winners = game.getWinners();
+    auto score = game.getScore();
+    server->sendToAllClients(command_creator.serverGetGameEndCommand(winners.first, winners.second, score));
+    game = utils::Game();   // game reset
+    if (isGameFull())
+    {
+        updateBidder();
+        startBidding();
+    } else
+    {
+        game.state = GameState::END;
+    }
 }
 
 };

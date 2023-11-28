@@ -3,6 +3,7 @@
 #include <commands/CommandsUtils.hpp>
 #include <utils/Bid.hpp>
 #include <utils/Card.hpp>
+#include <utils/Player.hpp>
 
 namespace commands
 {
@@ -38,7 +39,23 @@ std::string parseCommand(std::string command, std::vector<std::string>& command_
 /// where x is planned deal
 utils::Bid parseBidCommand(std::vector<std::string>& command_data)
 {
-    return utils::Bid();
+    utils::Trump trump;
+    if(command_data[2] == "PASS")
+        trump = utils::Trump::PASS;
+    else if(command_data[2] == "NO_TRUMP")
+        trump = utils::Trump::NO_TRUMP;
+    else if(command_data[2] == "SPADES")
+        trump = utils::Trump::SPADES;
+    else if(command_data[2] == "HEARTS")
+        trump = utils::Trump::HEARTS;
+    else if(command_data[2] == "DIAMONDS")
+        trump = utils::Trump::DIAMONDS;
+    else if(command_data[2] == "CLUBS")
+        trump = utils::Trump::CLUBS;
+
+    int deal = std::stoi(command_data[3]);
+
+    return utils::Bid(trump, deal);
 }
 
 /// @brief Generates Card object from command_data
@@ -48,6 +65,8 @@ utils::Bid parseBidCommand(std::vector<std::string>& command_data)
 /// PLAY [ PLAYER_NAME ] [CLUBS/DIAMONDS/HEARST/SPADES] [1..10/JACK/QUEEN/KING/ACE]
 utils::Card parsePlayCommand(std::vector<std::string>& command_data)
 {
+
+
     return utils::Card();
 }
 

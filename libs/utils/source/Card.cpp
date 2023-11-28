@@ -12,7 +12,7 @@ Card::Card(const char& r, const Suit& s) : suit(s)
     {
         std::string error_msg("Invalid card rank: ", r);
         throw std::range_error(error_msg);
-    } else 
+    } else
     {
         rank = r;
     }
@@ -60,5 +60,4 @@ bool operator==(const Card& lhs, const Card& rhs)
 {
     return lhs.rank == rhs.rank && lhs.suit == rhs.suit;
 }
-
 };

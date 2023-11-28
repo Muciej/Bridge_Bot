@@ -12,7 +12,7 @@ bool isMoveLegal(const Player& player, const Card& card_played, const Trick& tri
     {
         return false;
     }
-    if(card_played.suit == trick.suit)
+    if(player.position == trick.first || card_played.suit == trick.suit)
     {
         return true;
     } else

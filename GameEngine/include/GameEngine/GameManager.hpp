@@ -25,6 +25,7 @@ class GameManager
     utils::Game game;
 
     utils::Player players[4];
+    utils::Position bidder = utils::Position::NORTH;
     bool connected_players[4] = {false, false, false, false};
     bool shouldPrintInfo = false;
 
@@ -38,10 +39,12 @@ class GameManager
     void startGame();
     bool isGameFull();
     void infoPrint(const std::string& msg);
-    utils::Position getPlayerPosition(std::string name);
+    utils::Position getPositionFromString(const std::string& name);
     void generateAndSendDeck();
     bool isCommandLegal(int desired_cmd_length, GameState required_state, const std::string& player_name, std::vector<std::string>& command_data);
     void updateNowMoving();
+    void updateBidder();
+    void endGame();
 };
 
 };
