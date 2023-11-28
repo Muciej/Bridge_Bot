@@ -2,6 +2,7 @@
 #include <utils/Bid.hpp>
 #include <utils/Card.hpp>
 #include <utils/Player.hpp>
+#include <utils/Trick.hpp>
 
 namespace utils
 {
@@ -16,10 +17,12 @@ enum class GameState
 struct Game
 {
     GameState state = GameState::IN_LOBBY;
-    utils::Position declarer = utils::Position::NORTH;
-    utils::Position now_moving = utils::Position::NORTH;
-    utils::Bid contract;
-    //Trick tricks[13];
+    Position declarer = Position::NORTH;
+    Position now_moving = Position::NORTH;
+    Bid contract;
+    Trick tricks[13];
+    int current_trick = 0;
+    Trick getCurentTrick();
 };
 
 };

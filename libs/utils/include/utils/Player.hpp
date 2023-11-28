@@ -26,8 +26,10 @@ class Player
     bool is_bot;
     std::vector<utils::Card> hand;
 
-    Player() = default;    
+    Player() = default;
     Player(std::string n, Position pos, bool _is_bot) : name(std::move(n)), position(std::move(pos)), is_bot(_is_bot) {};
+
+    void drawCard(Card to_draw);
 };
 
 bool operator==(const Player& lhs, const Player& rhs);

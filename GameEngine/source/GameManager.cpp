@@ -4,6 +4,7 @@
 #include <commands/CommandsUtils.hpp>
 #include <commands/CommandCreator.hpp>
 #include <utils/Exceptions.hpp>
+#include <utils/MoveCorrectnessChecker.hpp>
 
 namespace game
 {
@@ -125,14 +126,30 @@ void GameManager::playerMove(std::vector<std::string>& command_data)
     if(!isCommandLegal(3, GameState::PLAYING, command_data[1], command_data))
         return;
 
+    auto card = commands::parsePlayCommand(command_data);
 
-    // sprawdzić, czy gracz ma w ogóle taką kartę
-    // sprawdzić, czy ruch legalny w obrębie trwającej lewy
+    if(!utils::isMoveLegal(players[game.now_moving], card, game.getCurentTrick()))
+    {
+        std::string reply = command_creator.serverGetErrorMsgCommand(getPlayerPosition(command_data[1]), "You cannot play this card!");
+        server->sendToAllClients(reply);
+        return;
+    }
+
+    players[game.now_moving].drawCard(card);
     // wykonać ruch i zaktualizować karty gracza
     // wysłać informację o ruchu do innych graczy
-    // zmienić aktualnie ruszającą się osobę
-    // jeśli znowu declarer to podbić nr lewy
-    // sprawdzić, czy gra się przypadkiem nie skończyła
+
+    updateNowMoving();
+    if (game.getCurentTrick().first == game.now_moving) // trick is ended
+    {
+        utils::setWinner(game.tricks[game.current_trick], game.contract.trump);
+        game.now_moving = game.getCurentTrick().winner;
+        game.current_trick++;
+    }
+    if(game.current_trick == 13)  // game end
+    {
+        // TODO end game, show results, restart
+    }
 }
 
 void GameManager::startBidding()

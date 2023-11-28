@@ -1,6 +1,8 @@
-#include <commands/CommandsUtils.hpp>
 #include <vector>
 #include <string>
+#include <commands/CommandsUtils.hpp>
+#include <utils/Bid.hpp>
+#include <utils/Card.hpp>
 
 namespace commands
 {
@@ -28,18 +30,25 @@ std::string parseCommand(std::string command, std::vector<std::string>& command_
     return command_data.at(0);
 }
 
-/// @brief Generates bid from command_data 
+/// @brief Generates bid from command_data
 /// @param command_data - split command
-/// @return bid created from command 
+/// @return bid created from command
 /// bid command should have format:
 /// BID [ PLAYER_NAME ] SUIT/NT [ x ]
 /// where x is planned deal
 utils::Bid parseBidCommand(std::vector<std::string>& command_data)
 {
-    if (command_data.size() != 4)
-    {
-    
-    }
+    return utils::Bid();
+}
+
+/// @brief Generates Card object from command_data
+/// @param command_data - split command
+/// @return Card created from command
+/// bid command should have format:
+/// PLAY [ PLAYER_NAME ] [CLUBS/DIAMONDS/HEARST/SPADES] [1..10/JACK/QUEEN/KING/ACE]
+utils::Card parsePlayCommand(std::vector<std::string>& command_data)
+{
+    return utils::Card();
 }
 
 };
