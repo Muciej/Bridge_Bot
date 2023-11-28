@@ -1,6 +1,6 @@
-#include <GameEngine/GameManager.hpp>
 #include <vector>
 #include <stdexcept>
+#include <GameEngine/GameManager.hpp>
 #include <commands/CommandsUtils.hpp>
 #include <commands/CommandCreator.hpp>
 #include <utils/Exceptions.hpp>
@@ -112,6 +112,7 @@ void GameManager::playerBid(std::vector<std::string>& command_data)
         server->sendToAllClients(reply);
     } else
     {
+        std::string reply = command_creator.serverGetBidInfoCommand(getPlayerPosition(command_data[1]), bid);
         updateNowMoving();
     }
 
@@ -136,13 +137,13 @@ void GameManager::playerMove(std::vector<std::string>& command_data)
     }
 
     players[game.now_moving].drawCard(card);
-    // wykonać ruch i zaktualizować karty gracza
-    // wysłać informację o ruchu do innych graczy
+    server->sendToAllClients(command_creator.serverGetPlayCommand(getPlayerPosition(command_data[1]), card));
 
     updateNowMoving();
     if (game.getCurentTrick().first == game.now_moving) // trick is ended
     {
         utils::setWinner(game.tricks[game.current_trick], game.contract.trump);
+        server->sendToAllClients(command_creator.serverGetTrickResultCommand(game.getCurentTrick().winner));
         game.now_moving = game.getCurentTrick().winner;
         game.current_trick++;
     }
