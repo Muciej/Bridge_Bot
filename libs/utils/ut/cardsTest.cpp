@@ -64,5 +64,5 @@ TEST(CardsTest, RoyalPrintTest)
     ss>>s;
     ASSERT_EQ(s, "♥A");
     ss.clear();
-    
+
 }
