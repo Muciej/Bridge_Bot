@@ -1,8 +1,8 @@
 #include <set>
+#include <iostream>
 #include <gtest/gtest.h>
 #include <utils/Card.hpp>
 #include <utils/Dealer.hpp>
-#include <iostream>
 
 TEST(DealerTests, TestProperHandSize)
 {
@@ -12,7 +12,7 @@ TEST(DealerTests, TestProperHandSize)
     for(int i = 0; i<4; i++)
     {
         ASSERT_EQ(hands[i].size(), 13);
-    }   
+    }
 }
 
 TEST(DealerTests, TestPrintHands)

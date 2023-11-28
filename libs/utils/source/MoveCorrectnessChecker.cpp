@@ -7,7 +7,7 @@ namespace utils
 
 bool isMoveLegal(const Player& player, const Card& card_played, const Trick& trick)
 {
-    bool has_card = std::find(player.hand.begin(), player.hand.end(), card_played) == player.hand.end();
+    bool has_card = std::find(player.hand.begin(), player.hand.end(), card_played) != player.hand.end();
     if(!has_card)
     {
         return false;

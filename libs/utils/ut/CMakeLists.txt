@@ -8,6 +8,7 @@ set(SOURCES
     dealerTest.cpp
     biddingTest.cpp
     trickTest.cpp
+    moveCorrectnessCheckerTest.cpp
 )
 
 add_executable(${EXEC_NAME} ${SOURCES})
