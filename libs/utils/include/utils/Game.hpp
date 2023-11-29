@@ -24,6 +24,7 @@ struct Game
     Trick tricks[13];
     int current_trick = 0;
     int dealer_won_tricks = 0;
+    bool dummy_card_revealed = false;
 
     Trick getCurentTrick();
     int getScore();

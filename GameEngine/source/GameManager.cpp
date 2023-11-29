@@ -6,6 +6,7 @@
 #include <utils/Exceptions.hpp>
 #include <utils/MoveCorrectnessChecker.hpp>
 
+/// @brief
 namespace game
 {
 
@@ -100,20 +101,20 @@ void GameManager::addPlayer(std::vector<std::string>& command_data)
 
 void GameManager::playerBid(std::vector<std::string>& command_data)
 {
-    if(!isCommandLegal(4, GameState::BIDDING, command_data[1], command_data))
+    if(!isCommandLegal(4, GameState::BIDDING, getPositionFromString(command_data[1]), command_data))
     {
         return;
     }
 
     // all wrong situations checked, bid can be placed
-    auto bid = commands::parseBidCommand(command_data);
+    const auto bid = commands::parseBidCommand(command_data);
     if(!bidding.addBid(getPositionFromString(command_data[1]), bid))
     {
         std::string reply = command_creator.serverGetErrorMsgCommand(getPositionFromString(command_data[1]), "Illegal bid!");
         server->sendToAllClients(reply);
     } else
     {
-        std::string reply = command_creator.serverGetBidInfoCommand(getPositionFromString(command_data[1]), bid);
+        std::string reply = command_creator.getBidInfoCommand(getPositionFromString(command_data[1]), bid);
         updateNowMoving();
     }
 
@@ -125,10 +126,10 @@ void GameManager::playerBid(std::vector<std::string>& command_data)
 
 void GameManager::playerMove(std::vector<std::string>& command_data)
 {
-    if(!isCommandLegal(3, GameState::PLAYING, command_data[1], command_data))
+    if(!isCommandLegal(3, GameState::PLAYING, getPositionFromString(command_data[1]), command_data))
         return;
 
-    auto card = commands::parsePlayCommand(command_data);
+    const auto card = commands::parsePlayCommand(command_data);
 
     if(!utils::isMoveLegal(players[game.now_moving], card, game.getCurentTrick()))
     {
@@ -142,9 +143,14 @@ void GameManager::playerMove(std::vector<std::string>& command_data)
     {
         game.tricks[game.current_trick].suit = card.suit;
     }
-    server->sendToAllClients(command_creator.serverGetPlayCommand(getPositionFromString(command_data[1]), card));
-    infoPrint(command_creator.serverGetPlayCommand(getPositionFromString(command_data[1]), card));
+    server->sendToAllClients(command_creator.getPlayCommand(getPositionFromString(command_data[1]), card));
+    infoPrint(command_creator.getPlayCommand(getPositionFromString(command_data[1]), card));
     updateNowMoving();
+    if (!game.dummy_card_revealed)
+    {
+        revealDummysCards();
+        game.dummy_card_revealed = true;
+    }
     if (game.getCurentTrick().first == game.now_moving) // trick is ended
     {
         utils::setWinner(game.tricks[game.current_trick], game.contract.trump);
@@ -195,6 +201,7 @@ void GameManager::generateAndSendDeck()
     server->sendToAllClients(command_creator.serverGetCardsInfoCommand(utils::Position::EAST, players[utils::Position::EAST].hand));
 }
 
+/// @brief Handles game start after bidding i.e. sets up everything for fist move
 void GameManager::startGame()
 {
     infoPrint("Bidding has ended, game started!");
@@ -208,13 +215,24 @@ void GameManager::startGame()
     game.contract = bidding.getContract().value();
     game.declarer = bidding.getDeclarer().value();
     game.now_moving = game.declarer;
+    updateNowMoving();
     game.current_trick = 0;
-    game.tricks[0].first = game.declarer;
+    game.tricks[0].first = game.now_moving;
     server->sendToAllClients(command_creator.serverGetBidEndCommand(game.declarer, game.contract));
     game.state = GameState::PLAYING;
 }
 
-bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_state, const std::string& player_name, std::vector<std::string>& command_data)
+
+/// @brief Checks if the given command represented by command_data vector is legal, i.e.
+/// if it has appropriate length, if game is in proper state to process it and if
+/// player who sent it is actually the player moving. The function allows declarer to send
+/// play command during dummy's round and prevents dummy from moving itself.
+/// @param desired_cmd_length - length expected for the command
+/// @param required_state - state required to process this command
+/// @param player_position - position of player, who placed the command
+/// @param command_data - vector of strings (split command)
+/// @return - ture if command is legal and false otherwise
+bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_state, const utils::Position& player_position, std::vector<std::string>& command_data)
 {
     if (game.state != required_state)
     {
@@ -225,9 +243,14 @@ bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_stat
     } else if(command_data.size() != static_cast<long unsigned int>(desired_cmd_length))
     {
         throw WrongCommandException();
-    } else if (players[static_cast<int>(game.now_moving)].name != player_name)
+    } else if (game.now_moving != utils::getPartnerPosition(game.declarer) && game.now_moving != player_position)   // not dummy's turn
     {
-        std::string reply = command_creator.serverGetErrorMsgCommand(getPositionFromString(player_name), "It's not your move!");
+        std::string reply = command_creator.serverGetErrorMsgCommand(player_position, "It's not your move!");
+        server->sendToAllClients(reply);
+        return false;
+    } else if (game.now_moving == utils::getPartnerPosition(game.declarer) && game.now_moving == player_position)   // dummy tries to move itself
+    {
+        std::string reply = command_creator.serverGetErrorMsgCommand(player_position, "You're dummy in this game, you cannot move by yourself!");
         server->sendToAllClients(reply);
         return false;
     }
@@ -245,6 +268,7 @@ void GameManager::updateBidder()
     bidder = static_cast<utils::Position>((static_cast<int>(game.now_moving) + 1)%4);
 }
 
+/// @brief Handles game end, send info about results and restarts game
 void GameManager::endGame()
 {
     infoPrint("Game ended, sending score info");
@@ -260,6 +284,12 @@ void GameManager::endGame()
     {
         game.state = GameState::END;
     }
+}
+
+/// @brief Sends dummy's cards to every player
+void GameManager::revealDummysCards()
+{
+    server->sendToAllClients(command_creator.serverGetCardsInfoCommand(utils::getPartnerPosition(game.declarer), players[utils::getPartnerPosition(game.declarer)].hand));
 }
 
 };

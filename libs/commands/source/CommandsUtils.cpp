@@ -100,4 +100,9 @@ utils::Card parsePlayCommand(std::vector<std::string>& command_data)
     return utils::Card(rank, suit);
 }
 
+utils::Position parseSetPosCommand(std::vector<std::string>& command_data)
+{
+    return utils::Position::NORTH;
+}
+
 };

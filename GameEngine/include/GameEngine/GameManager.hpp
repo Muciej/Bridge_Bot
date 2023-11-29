@@ -41,7 +41,8 @@ class GameManager
     void infoPrint(const std::string& msg);
     utils::Position getPositionFromString(const std::string& name);
     void generateAndSendDeck();
-    bool isCommandLegal(int desired_cmd_length, GameState required_state, const std::string& player_name, std::vector<std::string>& command_data);
+    bool isCommandLegal(int desired_cmd_length, GameState required_state, const utils::Position& player_position, std::vector<std::string>& command_data);
+    void revealDummysCards();
     void updateNowMoving();
     void updateBidder();
     void endGame();

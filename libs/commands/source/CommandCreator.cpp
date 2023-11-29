@@ -80,11 +80,12 @@ namespace commands
 
     /// @brief Returns command that informs aobut bid placed by player
     /// for client, the command should also be indication that bid was accepted
+    /// shared between server and clients
     /// @param position - position of bidding player
     /// @param bid - placed bid
     /// @return prepared command
     /// Format: BID [ position ] [ proposed trump ] [ amount ]
-    string CommandCreator::serverGetBidInfoCommand(const utils::Position& position, const utils::Bid& bid)
+    string CommandCreator::getBidInfoCommand(const utils::Position& position, const utils::Bid& bid)
     {
         return "BID " + getPositionString(position) + " " + getTrumpString(bid.trump) + " " + std::to_string(bid.deal);
     }
@@ -100,11 +101,12 @@ namespace commands
     }
 
     /// @brief Returns command informing about player move
+    /// shared between server and clients
     /// @param position - position of player who has just moved
     /// @param played_card - card played by that player
     /// @return prepared command
     /// Format: PLAY [ position ] [ played card ]
-    string CommandCreator::serverGetPlayCommand(const utils::Position& position, const utils::Card& played_card)
+    string CommandCreator::getPlayCommand(const utils::Position& position, const utils::Card& played_card)
     {
         std::stringstream ss;
         ss << played_card;
@@ -141,12 +143,39 @@ namespace commands
         return "ERROR " + getPositionString(position) + " " + msg;
     }
 
-    /// @brief Returns command that
+    /// @brief Returns command informing about winner of trick
     /// @param winner
     /// @return prepared command
-    /// Format: TRICKEND
+    /// Format: TRICKEND [ position ]
     string CommandCreator::serverGetTrickResultCommand(const utils::Position& winner)
     {
         return "TRICKEND " + getPositionString(winner);
+    }
+
+    /// @brief Returns command with request to add a new player to a game
+    /// @param name - name of player to be added
+    /// @param isBot - information if the player is bot
+    /// @return - prepared command
+    /// FORMAT: ADD_PLAYER [ name ] [ BOT/PLAYER ]
+    string CommandCreator::clientGetPlayerAddCommand(const string name, bool isBot)
+    {
+        return "ADD_PLAYER " + name + (isBot ? " BOT" : " PLAYER");
+    }
+
+    /// @brief Returns command informing about dummy's hand
+    /// @param dummy_position - position of dummy
+    /// @param hand - dummy's hand
+    /// @return - prepared command
+    /// FORMAT: DUMMY_HAND [ position ] [ position ] [ rank|color ]x13
+    /// where rank can be from {2,3,4,5,6,7,8,9,10,J,Q,K,A}
+    /// and color can be from {♠, ♥, ♦, ♣}
+    string CommandCreator::serverGetDummyCardInfoCommand(const utils::Position& dummy_position, std::vector<utils::Card>& hand)
+    {
+        std::stringstream ss;
+        for(const auto& card : hand)
+        {
+            ss << " " << card;
+        }
+        return "DUMMY_HAND " + getPositionString(dummy_position) + ss.str();
     }
 };

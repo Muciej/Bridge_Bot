@@ -31,7 +31,7 @@ TEST(CommandCreatorTest, ServerBiddingStartCmdTest)
 TEST(CommandCreatorTest, ServerBidInfoCmdTest)
 {
     commands::CommandCreator creator;
-    const auto cmd = creator.serverGetBidInfoCommand(utils::Position::EAST, utils::Bid(utils::Trump::HEARTS, 3));
+    const auto cmd = creator.getBidInfoCommand(utils::Position::EAST, utils::Bid(utils::Trump::HEARTS, 3));
     ASSERT_EQ(cmd, "BID EAST HEARTS 3");
 }
 
@@ -45,7 +45,7 @@ TEST(CommandCreatorTest, ServerBiddingEndCmdTest)
 TEST(CommandCreatorTest, ServerPlayCmdTest)
 {
     commands::CommandCreator creator;
-    const auto cmd = creator.serverGetPlayCommand(utils::Position::EAST, utils::Card(utils::RoyalRank::ACE, utils::Suit::SPADES));
+    const auto cmd = creator.getPlayCommand(utils::Position::EAST, utils::Card(utils::RoyalRank::ACE, utils::Suit::SPADES));
     ASSERT_EQ(cmd, "PLAY EAST ♠A");
 }
 
