@@ -9,23 +9,41 @@ namespace commands
 {
 
 
+/// @brief Converts string to utils::Position object
+/// @param pos_string - string containing postiion at the table
+/// @return - appropriate utils::Position object
+utils::Position getPositionFromString(const std::string& pos_string)
+{
+    utils::Position pos;
+    if(pos_string == "NORTH")
+        pos = utils::Position::NORTH;
+    else if(pos_string == "SOUTH")
+        pos = utils::Position::SOUTH;
+    else if(pos_string == "EAST")
+        pos = utils::Position::EAST;
+    else if(pos_string == "WEST")
+        pos = utils::Position::WEST;
+    return pos;
+}
+
 /// @brief Functions splits command into vector of string and returns first element
 /// which should be a command type
 /// @param command - command to split
 /// @param command_data - vector for result
 /// @return command type
-std::string parseCommand(std::string command, std::vector<std::string>& command_data)
+std::string parseCommand(const std::string& command, std::vector<std::string>& command_data)
 {
+    auto command_cpy = command;
     command_data.clear();
     size_t pos;
 
-    while ((pos = command.find(' ')) != std::string::npos) {
-        command_data.push_back(command.substr(0, pos));
-        command.erase(0, pos + 1);
+    while ((pos = command_cpy.find(' ')) != std::string::npos) {
+        command_data.push_back(command_cpy.substr(0, pos));
+        command_cpy.erase(0, pos + 1);
     }
-    if (command.length() > 0)
+    if (command_cpy.length() > 0)
     {
-        command_data.push_back(command);
+        command_data.push_back(command_cpy);
     }
 
     return command_data.at(0);
@@ -38,7 +56,7 @@ std::string parseCommand(std::string command, std::vector<std::string>& command_
 /// BID [ position ] [ trump ] [ deal ]
 /// where trump is one from {NO_TRUMP, PASS, SPADES, HEARTS, DIAMONDS, CLUBS}
 /// and deal is from 1 to 7
-utils::Bid parseBidCommand(std::vector<std::string>& command_data)
+utils::Bid parseBidCommand(const std::vector<std::string>& command_data)
 {
     utils::Trump trump;
     if(command_data[2] == "PASS")
@@ -65,10 +83,31 @@ utils::Bid parseBidCommand(std::vector<std::string>& command_data)
 /// bid command should have format:
 /// PLAY [ position ] [ card ]
 /// where card is like: ♦5
-utils::Card parsePlayCommand(std::vector<std::string>& command_data)
+utils::Card parsePlayCommand(const std::vector<std::string>& command_data)
 {
-    std::string card_str = command_data[2];
+    return getCardFromString(command_data[2]);
+}
 
+utils::Position parseSetPosCommand(const std::vector<std::string>& command_data)
+{
+    return utils::Position::NORTH;
+}
+
+std::vector<utils::Card> parseHandCommand(const std::vector<std::string>& command_data, int cards_start_index)
+{
+    std::vector<utils::Card> hand;
+
+    auto iterator = command_data.begin() + cards_start_index;
+    for(; iterator != command_data.end(); iterator++)
+    {
+        hand.push_back(getCardFromString(*iterator));
+    }
+
+    return hand;
+}
+
+utils::Card getCardFromString(const std::string& card_str)
+{
     std::string suit_str = card_str.substr(0, 3);
     std::string rank_str = card_str.substr(3);
 
@@ -100,9 +139,5 @@ utils::Card parsePlayCommand(std::vector<std::string>& command_data)
     return utils::Card(rank, suit);
 }
 
-utils::Position parseSetPosCommand(std::vector<std::string>& command_data)
-{
-    return utils::Position::NORTH;
-}
 
 };

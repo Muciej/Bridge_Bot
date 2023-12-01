@@ -2,6 +2,7 @@
 #include <HumanPlayer/HumanPlayer.hpp>
 #include <commands/CommandsUtils.hpp>
 #include <commands/CommandCreator.hpp>
+#include <utils/CardsUtils.hpp>
 
 void HumanPlayer::gameloop()
 {
@@ -39,7 +40,7 @@ void HumanPlayer::gameloop()
             else if( type == "DUMMY_HAND")
                 executeDummyHandCommand(command_vector);
             else
-                unknownCommand(command_vector);
+                unknownCommand(server_command);
         }
     }
 }
@@ -76,7 +77,7 @@ std::string HumanPlayer::choose_and_generate_command()
     }
 }
 
-void HumanPlayer::executeSetPosCommand(std::vector<std::string> command_data)
+void HumanPlayer::executeSetPosCommand(const std::vector<std::string>& command_data)
 {
     if (command_data[1] != client_name)
     {
@@ -84,48 +85,77 @@ void HumanPlayer::executeSetPosCommand(std::vector<std::string> command_data)
         return;
     } else
     {
-        // TODO getPositionFrom string
+        position = commands::getPositionFromString(command_data[2]);
+        prev_position = utils::getPrevPosition(position);
+    }
+
+    std::cout << "Assigned position: " << command_data[2] << std::endl;
+}
+
+void HumanPlayer::executeBidderCommand(const std::vector<std::string>& command_data)
+{
+    std::cout << "Auction has started! First bid will be placed by: " << command_data[1] << std::endl;
+    if (commands::getPositionFromString(command_data[1]) == position)
+    {
+        action_needed = true;
     }
 }
 
-void HumanPlayer::executeBidderCommand(std::vector<std::string> command_data)
+void HumanPlayer::executeBidCommand(const std::vector<std::string>& command_data)
 {
-
+    std::cout << command_data[1] << " bidded: " << command_data[3] << " " << command_data[2] << std::endl;
+    if (commands::getPositionFromString(command_data[1]) == prev_position)
+    {
+        action_needed = true;
+    }
 }
 
-void HumanPlayer::executeBidCommand(std::vector<std::string> command_data)
+void HumanPlayer::executeBidendCommand(const std::vector<std::string>& command_data)
 {
-
+    std::cout << "Auction ended! The declarer is " << command_data[1] << " and the contract is: " << command_data[3] << " " << command_data[2];
+    dummyPosition = utils::getPartnerPosition(commands::getPositionFromString(command_data[1]));
+    if (commands::getPositionFromString(command_data[1]) == position)
+    {
+        action_needed = true;
+    }
 }
 
-void HumanPlayer::executeBidendCommand(std::vector<std::string> command_data)
+void HumanPlayer::executePlayCommand(const std::vector<std::string>& command_data)
 {
-
+    std::cout << command_data[1] << " played: " << command_data[2] << std::endl;
+    if(commands::getPositionFromString(command_data[1]) == dummyPosition)
+    {
+        utils::drawCardFromHand(dummyHand, commands::getCardFromString(command_data[2]));
+    }
+    if (commands::getPositionFromString(command_data[1]) == prev_position)
+    {
+        action_needed = true;
+    }
 }
 
-void HumanPlayer::executePlayCommand(std::vector<std::string> command_data)
+void HumanPlayer::executeTrickendCommand(const std::vector<std::string>& command_data)
 {
-
+    std::cout << command_data[1] << " won the trick!" << std::endl << std::endl;
+    if (commands::getPositionFromString(command_data[1]) == position)
+    {
+        action_needed = true;
+    }
 }
 
-void HumanPlayer::executeTrickendCommand(std::vector<std::string> command_data)
+void HumanPlayer::executeGameendCommand(const std::vector<std::string>& command_data)
 {
-
+    std::cout << "Game ended!" << std::endl
+              << "winners are: " << command_data[1] << "/" << command_data[2];
 }
 
-void HumanPlayer::executeGameendCommand(std::vector<std::string> command_data)
+void HumanPlayer::unknownCommand(const std::string& command)
 {
-
+    std::cerr << "Received unknown command from the server: " << command << std::endl;
 }
 
-void HumanPlayer::unknownCommand(std::vector<std::string> command_data)
+void HumanPlayer::executeDummyHandCommand(const std::vector<std::string>& command_data)
 {
-
-}
-
-void HumanPlayer::executeDummyHandCommand(std::vector<std::string> command_data)
-{
-
+    dummyHand = commands::parseHandCommand(command_data, 1);
 }
 
 std::string HumanPlayer::prepareBidCommand()

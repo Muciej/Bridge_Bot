@@ -14,20 +14,6 @@ using exception::InvalidActionInCurrentStateException;
 using exception::WrongCommandException;
 using exception::WrongPlayerNumberException;
 
-utils::Position GameManager::getPositionFromString(const std::string& pos_string)
-{
-    utils::Position pos;
-    if(pos_string == "NORTH")
-        pos = utils::Position::NORTH;
-    else if(pos_string == "SOUTH")
-        pos = utils::Position::SOUTH;
-    else if(pos_string == "EAST")
-        pos = utils::Position::EAST;
-    else if(pos_string == "WEST")
-        pos = utils::Position::WEST;
-    return pos;
-}
-
 void GameManager::infoPrint(const std::string& msg)
 {
     if(shouldPrintInfo) std::cout << msg << std::endl;
@@ -101,20 +87,20 @@ void GameManager::addPlayer(std::vector<std::string>& command_data)
 
 void GameManager::playerBid(std::vector<std::string>& command_data)
 {
-    if(!isCommandLegal(4, GameState::BIDDING, getPositionFromString(command_data[1]), command_data))
+    if(!isCommandLegal(4, GameState::BIDDING, commands::getPositionFromString(command_data[1]), command_data))
     {
         return;
     }
 
     // all wrong situations checked, bid can be placed
     const auto bid = commands::parseBidCommand(command_data);
-    if(!bidding.addBid(getPositionFromString(command_data[1]), bid))
+    if(!bidding.addBid(commands::getPositionFromString(command_data[1]), bid))
     {
-        std::string reply = command_creator.serverGetErrorMsgCommand(getPositionFromString(command_data[1]), "Illegal bid!");
+        std::string reply = command_creator.serverGetErrorMsgCommand(commands::getPositionFromString(command_data[1]), "Illegal bid!");
         server->sendToAllClients(reply);
     } else
     {
-        std::string reply = command_creator.getBidInfoCommand(getPositionFromString(command_data[1]), bid);
+        std::string reply = command_creator.getBidInfoCommand(commands::getPositionFromString(command_data[1]), bid);
         updateNowMoving();
     }
 
@@ -126,14 +112,14 @@ void GameManager::playerBid(std::vector<std::string>& command_data)
 
 void GameManager::playerMove(std::vector<std::string>& command_data)
 {
-    if(!isCommandLegal(3, GameState::PLAYING, getPositionFromString(command_data[1]), command_data))
+    if(!isCommandLegal(3, GameState::PLAYING, commands::getPositionFromString(command_data[1]), command_data))
         return;
 
     const auto card = commands::parsePlayCommand(command_data);
 
     if(!utils::isMoveLegal(players[game.now_moving], card, game.getCurentTrick()))
     {
-        std::string reply = command_creator.serverGetErrorMsgCommand(getPositionFromString(command_data[1]), "You cannot play this card!");
+        std::string reply = command_creator.serverGetErrorMsgCommand(commands::getPositionFromString(command_data[1]), "You cannot play this card!");
         server->sendToAllClients(reply);
         return;
     }
@@ -143,8 +129,8 @@ void GameManager::playerMove(std::vector<std::string>& command_data)
     {
         game.tricks[game.current_trick].suit = card.suit;
     }
-    server->sendToAllClients(command_creator.getPlayCommand(getPositionFromString(command_data[1]), card));
-    infoPrint(command_creator.getPlayCommand(getPositionFromString(command_data[1]), card));
+    server->sendToAllClients(command_creator.getPlayCommand(commands::getPositionFromString(command_data[1]), card));
+    infoPrint(command_creator.getPlayCommand(commands::getPositionFromString(command_data[1]), card));
     updateNowMoving();
     if (!game.dummy_card_revealed)
     {

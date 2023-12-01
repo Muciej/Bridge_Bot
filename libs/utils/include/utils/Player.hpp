@@ -17,6 +17,7 @@ enum Position
 
 Position getPartnerPosition(const Position& pos);
 std::pair<Position, Position> getEnemiesPositions(const Position& pos);
+Position getPrevPosition(const Position& pos);
 
 class Player
 {

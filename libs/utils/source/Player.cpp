@@ -1,6 +1,5 @@
 #include <utils/Player.hpp>
-#include <vector>
-#include <algorithm>
+#include <utils/CardsUtils.hpp>
 
 namespace utils
 {
@@ -22,10 +21,14 @@ std::pair<Position, Position> getEnemiesPositions(const Position& pos)
     return std::pair(pos1, pos2);
 }
 
+Position getPrevPosition(const Position& pos)
+{
+    return static_cast<Position>((static_cast<int>(pos) + 3)%4);
+}
+
 void Player::drawCard(Card to_draw)
 {
-    auto newEnd = std::remove(hand.begin(), hand.end(), to_draw);
-    hand.erase(newEnd, hand.end());
+    utils::drawCardFromHand(hand, to_draw);
 }
 
 }; // namespace utils

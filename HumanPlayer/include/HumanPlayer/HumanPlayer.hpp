@@ -18,9 +18,12 @@ class HumanPlayer
     std::string client_name;
     bool action_needed = false;
     utils::Position position;
+    utils::Position prev_position;
     std::string server_command;
     std::vector<std::string> command_vector;
     std::vector<utils::Card> hand;
+    utils::Position dummyPosition;
+    std::vector<utils::Card> dummyHand;
 
     HumanPlayer(ClientPtr c) : client(std::move(c)) {};
 
@@ -28,15 +31,16 @@ class HumanPlayer
     std::string choose_and_generate_command();
     std::string prepareBidCommand();
     std::string preparePlayCommand();
-    void executeSetPosCommand(std::vector<std::string> command_data);
-    void executeBidderCommand(std::vector<std::string> command_data);
-    void executeBidCommand(std::vector<std::string> command_data);
-    void executeBidendCommand(std::vector<std::string> command_data);
-    void executePlayCommand(std::vector<std::string> command_data);
-    void executeTrickendCommand(std::vector<std::string> command_data);
-    void executeGameendCommand(std::vector<std::string> command_data);
-    void executeDummyHandCommand(std::vector<std::string> command_data);
-    void unknownCommand(std::vector<std::string> command_data);
+    void executeSetPosCommand(const std::vector<std::string>& command_data);
+    void executeBidderCommand(const std::vector<std::string>& command_data);
+    void executeBidCommand(const std::vector<std::string>& command_data);
+    void executeBidendCommand(const std::vector<std::string>& command_data);
+    void executePlayCommand(const std::vector<std::string>& command_data);
+    void executeTrickendCommand(const std::vector<std::string>& command_data);
+    void executeGameendCommand(const std::vector<std::string>& command_data);
+    void executeDummyHandCommand(const std::vector<std::string>& command_data);
+    void unknownCommand(const std::string& command);
+    void sendThread();
 
     void gameloop();
 };
