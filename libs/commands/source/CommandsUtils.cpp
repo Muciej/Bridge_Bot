@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <stdexcept>
 #include <commands/CommandsUtils.hpp>
 #include <utils/Bid.hpp>
 #include <utils/Card.hpp>
@@ -23,6 +24,8 @@ utils::Position getPositionFromString(const std::string& pos_string)
         pos = utils::Position::EAST;
     else if(pos_string == "WEST")
         pos = utils::Position::WEST;
+    else
+        throw std::runtime_error("Illegal position!");
     return pos;
 }
 
@@ -88,11 +91,24 @@ utils::Card parsePlayCommand(const std::vector<std::string>& command_data)
     return getCardFromString(command_data[2]);
 }
 
+
+/// @brief Generates position from SETPOS command
+/// @param command_data - split command
+/// @return - Position extracted from command
+/// setpos command should have format:
+/// SETPOS [ name ] [ position ]
+/// where name is any string and position is one of
+/// NORTH/SOUTH/EAST/WEST
 utils::Position parseSetPosCommand(const std::vector<std::string>& command_data)
 {
-    return utils::Position::NORTH;
+    return commands::getPositionFromString(command_data[2]);
 }
 
+
+/// @brief Generate vector of cards from command
+/// @param command_data - split HAND or DUMMYHAND command
+/// @param cards_start_index - index in command data vector from which cards start
+/// @return - vector of cards extracted from the command
 std::vector<utils::Card> parseHandCommand(const std::vector<std::string>& command_data, int cards_start_index)
 {
     std::vector<utils::Card> hand;
@@ -106,6 +122,10 @@ std::vector<utils::Card> parseHandCommand(const std::vector<std::string>& comman
     return hand;
 }
 
+
+/// @brief Extracts card object from string like ♦3 or ♦A
+/// @param card_str - string to extract card from
+/// @return - created Card object
 utils::Card getCardFromString(const std::string& card_str)
 {
     std::string suit_str = card_str.substr(0, 3);
@@ -138,6 +158,5 @@ utils::Card getCardFromString(const std::string& card_str)
 
     return utils::Card(rank, suit);
 }
-
 
 };

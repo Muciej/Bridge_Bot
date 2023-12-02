@@ -155,7 +155,7 @@ void HumanPlayer::unknownCommand(const std::string& command)
 
 void HumanPlayer::executeDummyHandCommand(const std::vector<std::string>& command_data)
 {
-    dummyHand = commands::parseHandCommand(command_data, 1);
+    dummyHand = commands::parseHandCommand(command_data, 2);
 }
 
 std::string HumanPlayer::prepareBidCommand()

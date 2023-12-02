@@ -60,4 +60,16 @@ bool operator==(const Card& lhs, const Card& rhs)
 {
     return lhs.rank == rhs.rank && lhs.suit == rhs.suit;
 }
+
+bool operator<(const Card& lhs, const Card& rhs)
+{
+    if( lhs.suit != rhs.suit)
+    {
+        return static_cast<int>(lhs.suit) < static_cast<int>(rhs.suit);
+    } else
+    {
+        return static_cast<int>(lhs.rank) < static_cast<int>(rhs.rank);
+    }
+}
+
 };

@@ -14,7 +14,7 @@ void drawCardFromHand(std::vector<Card>& hand, const Card& card_to_draw)
 
 bool isCardInHand(const std::vector<Card> hand, const Card& card)
 {
-    return std::find(hand.begin(), hand.end(), card) == hand.end();
+    return std::find(hand.begin(), hand.end(), card) != hand.end();
 }
 
 } // namespace utils

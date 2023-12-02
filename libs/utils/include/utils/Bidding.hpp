@@ -1,8 +1,8 @@
 #pragma once
-#include <utils/Bid.hpp>
-#include <utils/Player.hpp>
 #include <vector>
 #include <optional>
+#include <utils/Bid.hpp>
+#include <utils/Player.hpp>
 
 namespace utils
 {
@@ -17,12 +17,12 @@ class Bidding
 
     public:
     std::vector<Bid> history;
-    
+
     bool addBid(const Position& pos, const Bid& bid);
     bool isBiddingEnded();
     void clear();
     std::optional<Position> getDeclarer();
     std::optional<Bid> getContract();
 };
-    
+
 };

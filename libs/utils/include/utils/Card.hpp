@@ -31,5 +31,6 @@ struct Card
 
 std::ostream& operator<<(std::ostream& stream, const Card& card);
 bool operator==(const Card& lhs, const Card& rhs);
+bool operator<(const Card& lhs, const Card& rhs);
 
 };
