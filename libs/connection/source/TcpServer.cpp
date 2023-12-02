@@ -9,7 +9,7 @@
 namespace connection
 {
 
-TcpServer::TcpServer(ContainerPtr receive_container, ContainerPtr send_container) 
+TcpServer::TcpServer(ContainerPtr receive_container, ContainerPtr send_container)
     : received_commands(std::move(receive_container)), commands_to_send(std::move(send_container)) {};
 
 void TcpServer::startListening(const in_port_t& port)
@@ -17,7 +17,7 @@ void TcpServer::startListening(const in_port_t& port)
     sockpp::initialize();
     acceptor = sockpp::tcp_acceptor(port);
 
-    if (!acceptor) 
+    if (!acceptor)
     {
 		std::cerr << "Error creating the acceptor: " << acceptor.last_error_str() << std::endl;
 	}
@@ -45,7 +45,7 @@ void TcpServer::acceptorLoop()
         } else
         {
             std::cerr << "Error accepting incoming connection: "
-                << acceptor.last_error_str() << std::endl;            
+                << acceptor.last_error_str() << std::endl;
         }
     }
 }
@@ -55,7 +55,7 @@ void TcpServer::clientReader(sockpp::tcp_socket socket)
     char buf[512];
     ssize_t n;
 
-    while ((n = socket.read(buf, sizeof(buf))) > 0) 
+    while ((n = socket.read(buf, sizeof(buf))) > 0)
     {
         std::cout << "Received: " << std::string(buf, n) << std::endl;
         std::scoped_lock{received_commands->mutex};
@@ -63,12 +63,12 @@ void TcpServer::clientReader(sockpp::tcp_socket socket)
         receive_condition.notify_all();
 	}
 
-	if (n < 0) 
+	if (n < 0)
     {
-		std::cout << "Read error [" << socket.last_error() << "]: " 
+		std::cout << "Read error [" << socket.last_error() << "]: "
 			<< socket.last_error_str() << std::endl;
 	}
-	socket.shutdown(SHUT_RDWR);    
+	socket.shutdown(SHUT_RDWR);
 }
 
 void TcpServer::allClientSender()
@@ -94,6 +94,7 @@ void TcpServer::allClientSender()
 
 void TcpServer::sendToAllClients(const std::string &command)
 {
+    std::cout << "TCPSERVER: sending: " << command;
     std::scoped_lock{commands_to_send->mutex};
     commands_to_send->pushCommand(command);
     send_condition.notify_all();

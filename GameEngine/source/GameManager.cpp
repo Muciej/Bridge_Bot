@@ -68,6 +68,7 @@ void GameManager::addPlayer(std::vector<std::string>& command_data)
             bool is_bot = command_data.at(2) == "BOT" ? true : false;
             players[pos] = utils::Player(command_data.at(1), utils::Position(pos), is_bot);
             connected_players[pos] = true;
+            server->sendToAllClients(command_creator.serverGetSetPositionCommand(command_data[1], players[pos].position));
             infoPrint("Player " + command_data.at(1) + " connected!");
             if(isGameFull())
             {

@@ -3,12 +3,13 @@
 #include <commands/CommandsUtils.hpp>
 #include <commands/CommandCreator.hpp>
 #include <utils/CardsUtils.hpp>
+#include <utils/Printer.hpp>
 
 void HumanPlayer::gameloop()
 {
     std::cout << "Set your name: ";
     std::cin>>client_name;
-    client->sendCommand("ADD PLAYER " + client_name + " PLAYER");
+    client->sendCommand("ADD_PLAYER " + client_name + " PLAYER");
 
     while(true)
     {
@@ -48,6 +49,7 @@ void HumanPlayer::gameloop()
 
 void HumanPlayer::show_available_commands()
 {
+    printer::printSortedHand(std::cout, hand);
     std::cout << "Available commands: " << std::endl
               << "1. BID" << std::endl
               << "2. PLAY"<< std::endl;
@@ -126,6 +128,7 @@ void HumanPlayer::executePlayCommand(const std::vector<std::string>& command_dat
     if(commands::getPositionFromString(command_data[1]) == dummyPosition)
     {
         utils::drawCardFromHand(dummyHand, commands::getCardFromString(command_data[2]));
+        printer::printSortedHand(std::cout, dummyHand);
     }
     if (commands::getPositionFromString(command_data[1]) == prev_position)
     {
@@ -156,6 +159,7 @@ void HumanPlayer::unknownCommand(const std::string& command)
 void HumanPlayer::executeDummyHandCommand(const std::vector<std::string>& command_data)
 {
     dummyHand = commands::parseHandCommand(command_data, 2);
+    printer::printSortedHand(std::cout, dummyHand);
 }
 
 std::string HumanPlayer::prepareBidCommand()
