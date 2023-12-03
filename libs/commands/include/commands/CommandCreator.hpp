@@ -27,6 +27,7 @@ class CommandCreator
     string getPlayCommand(const utils::Position& position, const utils::Card& played_card);
 
     string clientGetPlayerAddCommand(const string name, bool isBot);
+    string clientGetDummyPlayCommand(const utils::Position& position, const utils::Card played_card);
 };
 
 };

@@ -1,23 +1,25 @@
-#include <ostream>
+#include <sstream>
+#include <algorithm>
 #include <utils/Printer.hpp>
 #include <utils/Card.hpp>
-#include <algorithm>
 
 namespace printer
 {
 
-void printHand(std::ostream& stream, const std::vector<utils::Card>& hand)
+std::string printHand(const std::vector<utils::Card>& hand)
 {
+    std::stringstream ss;
     for(const auto& card : hand)
     {
-        stream << card << " ";
+        ss << card << " ";
     }
+    return ss.str();
 }
 
-void printSortedHand(std::ostream& stream, std::vector<utils::Card> hand)
+std::string printSortedHand(std::vector<utils::Card> hand)
 {
     std::sort(hand.begin(), hand.end());
-    printHand(stream, hand);
+    return printHand(hand);
 }
 
 } // namespace printer

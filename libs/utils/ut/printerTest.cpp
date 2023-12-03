@@ -21,31 +21,25 @@ namespace
 TEST(PrinterTest, PrintEmptyHandTest)
 {
     std::vector<Card> hand;
-    std::stringstream ss;
-    printer::printHand(ss, hand);
-    EXPECT_EQ(ss.str(), "");
+    EXPECT_EQ(printer::printHand(hand), "");
 }
 
 TEST(PrinterTest, SortedPrintEmptyHandTest)
 {
     std::vector<Card> hand;
-    std::stringstream ss;
-    printer::printSortedHand(ss, hand);
-    EXPECT_EQ(ss.str(), "");
+
+    EXPECT_EQ(printer::printHand(hand), "");
 }
 
 TEST(PrinterTest, PrintNonEmptyHandTest)
 {
     auto hand = example_hand;
-    std::stringstream ss;
-    printer::printHand(ss, hand);
-    EXPECT_EQ(ss.str(), expected_non_sorted);
+
+    EXPECT_EQ(printer::printHand(hand), expected_non_sorted);
 }
 
 TEST(PrinterTest, SortedPrintNonEmptyHandTest)
 {
     auto hand = example_hand;
-    std::stringstream ss;
-    printer::printSortedHand(ss, hand);
-    EXPECT_EQ(ss.str(), expected_sorted);
+    EXPECT_EQ(printer::printHand(hand), expected_sorted);
 }

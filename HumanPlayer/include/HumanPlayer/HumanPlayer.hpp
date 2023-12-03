@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <optional>
 #include <connection/TcpClient.hpp>
 #include <utils/Player.hpp>
 #include <utils/Card.hpp>
@@ -16,14 +17,14 @@ class HumanPlayer
     commands::CommandCreator commands_creator;
 
     std::string client_name;
-    bool action_needed = false;
     utils::Position position;
     utils::Position prev_position;
     std::string server_command;
     std::vector<std::string> command_vector;
-    std::vector<utils::Card> hand;
     utils::Position dummyPosition;
-    std::vector<utils::Card> dummyHand;
+    std::optional<std::vector<utils::Card>> hand;
+    std::optional<std::vector<utils::Card>> dummyHand;
+    std::vector<std::string> history;
 
     HumanPlayer(ClientPtr c) : client(std::move(c)) {};
 
@@ -31,6 +32,7 @@ class HumanPlayer
     std::string choose_and_generate_command();
     std::string prepareBidCommand();
     std::string preparePlayCommand();
+    std::string prapareDummyPlayCommand();
     void executeSetPosCommand(const std::vector<std::string>& command_data);
     void executeHandCommand(const std::vector<std::string>& command_data);
     void executeBidderCommand(const std::vector<std::string>& command_data);
@@ -42,6 +44,7 @@ class HumanPlayer
     void executeDummyHandCommand(const std::vector<std::string>& command_data);
     void unknownCommand(const std::string& command);
     void sendThread();
+    void printUI();
 
     void gameloop();
 };

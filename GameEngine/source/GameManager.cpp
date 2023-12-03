@@ -39,6 +39,8 @@ void GameManager::gameLoop()
             playerMove(command_data);
         else if(command_type == "BID")
             playerBid(command_data);
+        else if(command_type == "DUMMY_PLAY")
+            playerDummyMove(command_data);
         else
             throw WrongCommandException();
     }
@@ -152,6 +154,45 @@ void GameManager::playerMove(std::vector<std::string>& command_data)
     } else
     {
         game.tricks[game.current_trick].first = game.now_moving;
+        infoPrint("Next trick will be started by: " + game.now_moving);
+    }
+}
+
+void GameManager::playerDummyMove(std::vector<std::string>& command_data)
+{
+    if(!isCommandLegal(3, GameState::PLAYING, utils::getPartnerPosition(commands::getPositionFromString(command_data[1])), command_data))
+        return;
+
+    const auto card = commands::parsePlayCommand(command_data);
+
+    if(!utils::isMoveLegal(players[game.now_moving], card, game.getCurentTrick()))
+    {
+        std::string reply = command_creator.serverGetErrorMsgCommand(commands::getPositionFromString(command_data[1]), "You cannot play this card!");
+        server->sendToAllClients(reply);
+        return;
+    }
+    players[game.now_moving].drawCard(card);
+    if(game.now_moving == game.getCurentTrick().first)
+    {
+        game.tricks[game.current_trick].suit = card.suit;
+    }
+    server->sendToAllClients(command_creator.getPlayCommand(commands::getPositionFromString(command_data[1]), card));
+    infoPrint(command_creator.getPlayCommand(commands::getPositionFromString(command_data[1]), card));
+    updateNowMoving();
+    if (game.getCurentTrick().first == game.now_moving) // trick is ended
+    {
+        utils::setWinner(game.tricks[game.current_trick], game.contract.trump);
+        server->sendToAllClients(command_creator.serverGetTrickResultCommand(game.getCurentTrick().winner));
+        game.now_moving = game.getCurentTrick().winner;
+        game.current_trick++;
+    }
+    if(game.current_trick == 13)  // game end
+    {
+        endGame();
+    } else
+    {
+        game.tricks[game.current_trick].first = game.now_moving;
+        infoPrint("Next trick will be started by: " + game.now_moving);
     }
 }
 
@@ -206,6 +247,7 @@ void GameManager::startGame()
     updateNowMoving();
     game.current_trick = 0;
     game.tricks[0].first = game.now_moving;
+    infoPrint("First trick will be started by: " + game.now_moving);
     server->sendToAllClients(command_creator.serverGetBidEndCommand(game.declarer, game.contract));
     game.state = GameState::PLAYING;
 }
@@ -231,19 +273,12 @@ bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_stat
     } else if(command_data.size() != static_cast<long unsigned int>(desired_cmd_length))
     {
         throw WrongCommandException();
-    }
-
-    // declarer moves for dummy
-    if (game.state == GameState::PLAYING && player_position == game.declarer && game.now_moving == utils::getPartnerPosition(game.declarer))
-    {
-        return true;
     } else if (player_position != game.now_moving)
     {
         std::string reply = command_creator.serverGetErrorMsgCommand(player_position, "It's not your move!");
         server->sendToAllClients(reply);
         return false;
     }
-
     return true;
 }
 
@@ -278,7 +313,7 @@ void GameManager::endGame()
 /// @brief Sends dummy's cards to every player
 void GameManager::revealDummysCards()
 {
-    server->sendToAllClients(command_creator.serverGetCardsInfoCommand(utils::getPartnerPosition(game.declarer), players[utils::getPartnerPosition(game.declarer)].hand));
+    server->sendToAllClients(command_creator.serverGetDummyCardInfoCommand(utils::getPartnerPosition(game.declarer), players[utils::getPartnerPosition(game.declarer)].hand));
 }
 
 };

@@ -5,7 +5,7 @@
 namespace printer
 {
 
-void printHand(std::ostream& stream, const std::vector<utils::Card>& hand);
-void printSortedHand(std::ostream& stream, std::vector<utils::Card> hand);
+std::string printHand(const std::vector<utils::Card>& hand);
+std::string printSortedHand(std::vector<utils::Card> hand);
 
 } // namespace printer

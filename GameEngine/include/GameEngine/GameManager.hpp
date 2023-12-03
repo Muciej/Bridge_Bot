@@ -35,6 +35,7 @@ class GameManager
     void addPlayer(std::vector<std::string>& command_data);
     void playerBid(std::vector<std::string>& command_data);
     void playerMove(std::vector<std::string>& command_data);
+    void playerDummyMove(std::vector<std::string>& command_data);
     void startBidding();
     void startGame();
     bool isGameFull();

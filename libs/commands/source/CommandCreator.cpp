@@ -178,4 +178,11 @@ namespace commands
         }
         return "DUMMY_HAND " + getPositionString(dummy_position) + ss.str();
     }
+
+    string CommandCreator::clientGetDummyPlayCommand(const utils::Position& position, const utils::Card played_card)
+    {
+        std::stringstream ss;
+        ss << played_card;
+        return "DUMMY_PLAY " + getPositionString(position) + " " + ss.str();
+    }
 };
