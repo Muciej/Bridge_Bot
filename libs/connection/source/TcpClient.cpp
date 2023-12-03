@@ -5,7 +5,7 @@
 namespace connection
 {
 
-TcpClient::TcpClient(ContainerPtr receive_container, ContainerPtr send_container) 
+TcpClient::TcpClient(ContainerPtr receive_container, ContainerPtr send_container)
     : received_commands(std::move(receive_container)), commands_to_send(std::move(send_container)) {};
 
 bool TcpClient::startConnection(const std::string& host, const in_port_t& port)
@@ -83,10 +83,11 @@ void TcpClient::receiverThread(sockpp::tcp_socket socket)
     char buf[256];
     ssize_t n;
 
-    while ((n = socket.read(buf, sizeof(buf))) > 0) 
+    while ((n = socket.read(buf, sizeof(buf))) > 0)
     {
         std::scoped_lock{received_commands->mutex};
         received_commands->pushCommand(std::string(buf, n));
+        receive_condition.notify_all();
 	}
 }
 

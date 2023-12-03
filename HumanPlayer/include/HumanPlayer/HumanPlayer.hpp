@@ -32,6 +32,7 @@ class HumanPlayer
     std::string prepareBidCommand();
     std::string preparePlayCommand();
     void executeSetPosCommand(const std::vector<std::string>& command_data);
+    void executeHandCommand(const std::vector<std::string>& command_data);
     void executeBidderCommand(const std::vector<std::string>& command_data);
     void executeBidCommand(const std::vector<std::string>& command_data);
     void executeBidendCommand(const std::vector<std::string>& command_data);

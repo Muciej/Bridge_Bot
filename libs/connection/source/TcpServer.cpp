@@ -94,7 +94,6 @@ void TcpServer::allClientSender()
 
 void TcpServer::sendToAllClients(const std::string &command)
 {
-    std::cout << "TCPSERVER: sending: " << command;
     std::scoped_lock{commands_to_send->mutex};
     commands_to_send->pushCommand(command);
     send_condition.notify_all();

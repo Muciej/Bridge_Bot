@@ -26,6 +26,11 @@ Position getPrevPosition(const Position& pos)
     return static_cast<Position>((static_cast<int>(pos) + 3)%4);
 }
 
+Position getNextPosition(const Position& pos)
+{
+    return static_cast<Position>((static_cast<int>(pos) + 1)%4);
+}
+
 void Player::drawCard(Card to_draw)
 {
     utils::drawCardFromHand(hand, to_draw);

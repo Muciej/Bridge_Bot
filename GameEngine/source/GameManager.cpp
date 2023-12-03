@@ -102,6 +102,7 @@ void GameManager::playerBid(std::vector<std::string>& command_data)
     } else
     {
         std::string reply = command_creator.getBidInfoCommand(commands::getPositionFromString(command_data[1]), bid);
+        server->sendToAllClients(reply);
         updateNowMoving();
     }
 
@@ -230,14 +231,15 @@ bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_stat
     } else if(command_data.size() != static_cast<long unsigned int>(desired_cmd_length))
     {
         throw WrongCommandException();
-    } else if (game.now_moving != utils::getPartnerPosition(game.declarer) && game.now_moving != player_position)   // not dummy's turn
+    }
+
+    // declarer moves for dummy
+    if (game.state == GameState::PLAYING && player_position == game.declarer && game.now_moving == utils::getPartnerPosition(game.declarer))
+    {
+        return true;
+    } else if (player_position != game.now_moving)
     {
         std::string reply = command_creator.serverGetErrorMsgCommand(player_position, "It's not your move!");
-        server->sendToAllClients(reply);
-        return false;
-    } else if (game.now_moving == utils::getPartnerPosition(game.declarer) && game.now_moving == player_position)   // dummy tries to move itself
-    {
-        std::string reply = command_creator.serverGetErrorMsgCommand(player_position, "You're dummy in this game, you cannot move by yourself!");
         server->sendToAllClients(reply);
         return false;
     }

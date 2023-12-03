@@ -26,6 +26,8 @@ void HumanPlayer::gameloop()
             auto type = commands::parseCommand(server_command, command_vector);
             if( type == "SETPOS")
                 executeSetPosCommand(command_vector);
+            else if( type == "HAND")
+                executeHandCommand(command_vector);
             else if( type == "BIDDER")
                 executeBidderCommand(command_vector);
             else if( type == "BID")
@@ -50,6 +52,7 @@ void HumanPlayer::gameloop()
 void HumanPlayer::show_available_commands()
 {
     printer::printSortedHand(std::cout, hand);
+    std::cout << std::endl;
     std::cout << "Available commands: " << std::endl
               << "1. BID" << std::endl
               << "2. PLAY"<< std::endl;
@@ -66,7 +69,7 @@ std::string HumanPlayer::choose_and_generate_command()
         {
             std::cout << "Invalid command number, try again: ";
         }
-    } while (cmd_no > 0 && cmd_no <= 2);
+    } while (cmd_no < 0 || cmd_no > 2);
 
     switch (cmd_no)
     {
@@ -114,9 +117,12 @@ void HumanPlayer::executeBidCommand(const std::vector<std::string>& command_data
 
 void HumanPlayer::executeBidendCommand(const std::vector<std::string>& command_data)
 {
-    std::cout << "Auction ended! The declarer is " << command_data[1] << " and the contract is: " << command_data[3] << " " << command_data[2];
-    dummyPosition = utils::getPartnerPosition(commands::getPositionFromString(command_data[1]));
-    if (commands::getPositionFromString(command_data[1]) == position)
+    std::cout << "Auction ended! The declarer is " << command_data[1] << " and the contract is: "
+              << command_data[3] << " " << command_data[2] << std::endl;
+    auto declarer = commands::getPositionFromString(command_data[1]);
+    dummyPosition = utils::getPartnerPosition(declarer);
+    auto opening_player = utils::getNextPosition(declarer);
+    if (opening_player == position)
     {
         action_needed = true;
     }
@@ -151,25 +157,35 @@ void HumanPlayer::executeGameendCommand(const std::vector<std::string>& command_
               << "winners are: " << command_data[1] << "/" << command_data[2];
 }
 
+void HumanPlayer::executeDummyHandCommand(const std::vector<std::string>& command_data)
+{
+    dummyHand = commands::parseHandCommand(command_data, 2);
+    std::cout << "Dummy hand is: ";
+    printer::printSortedHand(std::cout, dummyHand);
+    std::cout << std::endl;
+}
+
+void HumanPlayer::executeHandCommand(const std::vector<std::string>& command_data)
+{
+    if (commands::getPositionFromString(command_data[1]) != position)
+        return;
+
+    hand = commands::parseHandCommand(command_data, 2);
+}
+
 void HumanPlayer::unknownCommand(const std::string& command)
 {
     std::cerr << "Received unknown command from the server: " << command << std::endl;
 }
 
-void HumanPlayer::executeDummyHandCommand(const std::vector<std::string>& command_data)
-{
-    dummyHand = commands::parseHandCommand(command_data, 2);
-    printer::printSortedHand(std::cout, dummyHand);
-}
-
 std::string HumanPlayer::prepareBidCommand()
 {
-    std::cout << "1. PASS"
-              << "2. NO_TRUMP"
-              << "3. SPADES"
-              << "4. HEARTS"
-              << "5. DIAMONDS"
-              << "6. CLUBS"
+    std::cout << "1. PASS" << std::endl
+              << "2. NO_TRUMP" << std::endl
+              << "3. SPADES" << std::endl
+              << "4. HEARTS" << std::endl
+              << "5. DIAMONDS" << std::endl
+              << "6. CLUBS" << std::endl
               << "Choose trump: ";
 
     int choice;
@@ -209,11 +225,6 @@ std::string HumanPlayer::prepareBidCommand()
 
 std::string HumanPlayer::preparePlayCommand()
 {
-    for(const auto& card : hand)
-    {
-        std::cout << card << " ";
-    }
-    std::cout << std::endl;
     std::cout << "Choose card to play (use first letter of color name instead of symbol), like H10: ";
     std::string card_str;
     std::cin >> card_str;
