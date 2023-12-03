@@ -4,6 +4,9 @@
 #include <utils/Bid.hpp>
 #include <stdexcept>
 
+#include <utils/Printer.hpp>
+#include <iostream>
+
 namespace utils
 {
 
@@ -48,9 +51,9 @@ void setWinner(Trick& trick, utils::Trump trump)
     {
         big_trump_ind = checkBiggestInSuit(trick, getSuitFromValidTrump(trump));
     }
-    auto big_suit = checkBiggestInSuit(trick, trick.suit);
+    auto big_suit_ind = checkBiggestInSuit(trick, trick.suit);
 
-    trick.winner = big_trump_ind ? static_cast<Position>(big_trump_ind.value()) : static_cast<Position>(big_suit.value());
+    trick.winner = big_trump_ind.has_value() ? static_cast<Position>(big_trump_ind.value()) : static_cast<Position>(big_suit_ind.value());
 }
 
 }; // namespace utils

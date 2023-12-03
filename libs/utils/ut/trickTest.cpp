@@ -73,3 +73,17 @@ TEST(TrickTest, SetWinnerAllCardsInSuit)
     utils::setWinner(trick, Trump::CLUBS);
     ASSERT_EQ(trick.winner, Position::NORTH);
 }
+
+TEST(TrickTest, TempErrorTest)
+{
+    Trick trick;
+    trick.first = Position::EAST;
+    trick.suit = Suit::SPADES;
+    trick.played_cards[Position::NORTH] = Card(utils::RoyalRank::QUEEN, Suit::SPADES);
+    trick.played_cards[Position::EAST] = Card(4, Suit::SPADES);
+    trick.played_cards[Position::SOUTH] = Card(utils::RoyalRank::JACK, Suit::SPADES);
+    trick.played_cards[Position::WEST] = Card(10, Suit::SPADES);
+    utils::setWinner(trick, Trump::CLUBS);
+    ASSERT_EQ(trick.winner, Position::NORTH);
+}
+

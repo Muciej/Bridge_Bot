@@ -5,6 +5,7 @@
 #include <commands/CommandCreator.hpp>
 #include <utils/Exceptions.hpp>
 #include <utils/MoveCorrectnessChecker.hpp>
+#include <utils/Printer.hpp>
 
 /// @brief
 namespace game
@@ -129,9 +130,11 @@ void GameManager::playerMove(std::vector<std::string>& command_data)
     }
 
     players[game.now_moving].drawCard(card);
+    game.tricks[game.current_trick].played_cards[game.now_moving] = card;
     if(game.now_moving == game.getCurentTrick().first)
     {
         game.tricks[game.current_trick].suit = card.suit;
+        infoPrint("Current trick suit is: " + printer::printSuit(card.suit));
     }
     server->sendToAllClients(command_creator.getPlayCommand(commands::getPositionFromString(command_data[1]), card));
     infoPrint(command_creator.getPlayCommand(commands::getPositionFromString(command_data[1]), card));
@@ -141,21 +144,7 @@ void GameManager::playerMove(std::vector<std::string>& command_data)
         revealDummysCards();
         game.dummy_card_revealed = true;
     }
-    if (game.getCurentTrick().first == game.now_moving) // trick is ended
-    {
-        utils::setWinner(game.tricks[game.current_trick], game.contract.trump);
-        server->sendToAllClients(command_creator.serverGetTrickResultCommand(game.getCurentTrick().winner));
-        game.now_moving = game.getCurentTrick().winner;
-        game.current_trick++;
-    }
-    if(game.current_trick == 13)  // game end
-    {
-        endGame();
-    } else
-    {
-        game.tricks[game.current_trick].first = game.now_moving;
-        infoPrint("Next trick will be started by: " + game.now_moving);
-    }
+    checkTrickEnd();
 }
 
 void GameManager::playerDummyMove(std::vector<std::string>& command_data)
@@ -167,33 +156,23 @@ void GameManager::playerDummyMove(std::vector<std::string>& command_data)
 
     if(!utils::isMoveLegal(players[game.now_moving], card, game.getCurentTrick()))
     {
-        std::string reply = command_creator.serverGetErrorMsgCommand(commands::getPositionFromString(command_data[1]), "You cannot play this card!");
+        std::string reply = command_creator.serverGetErrorMsgCommand(utils::getPartnerPosition(game.declarer), "You cannot play this card!");
+        infoPrint(printer::printSortedHand(players[game.now_moving].hand));
+        infoPrint(printer::printSuit(game.getCurentTrick().suit));
         server->sendToAllClients(reply);
         return;
     }
     players[game.now_moving].drawCard(card);
+    game.tricks[game.current_trick].played_cards[game.now_moving] = card;
     if(game.now_moving == game.getCurentTrick().first)
     {
         game.tricks[game.current_trick].suit = card.suit;
+        infoPrint("Current trick suit is: " + printer::printSuit(card.suit));
     }
-    server->sendToAllClients(command_creator.getPlayCommand(commands::getPositionFromString(command_data[1]), card));
-    infoPrint(command_creator.getPlayCommand(commands::getPositionFromString(command_data[1]), card));
+    server->sendToAllClients(command_creator.getPlayCommand(game.now_moving, card));
+    infoPrint(command_creator.getPlayCommand(game.now_moving, card));
     updateNowMoving();
-    if (game.getCurentTrick().first == game.now_moving) // trick is ended
-    {
-        utils::setWinner(game.tricks[game.current_trick], game.contract.trump);
-        server->sendToAllClients(command_creator.serverGetTrickResultCommand(game.getCurentTrick().winner));
-        game.now_moving = game.getCurentTrick().winner;
-        game.current_trick++;
-    }
-    if(game.current_trick == 13)  // game end
-    {
-        endGame();
-    } else
-    {
-        game.tricks[game.current_trick].first = game.now_moving;
-        infoPrint("Next trick will be started by: " + game.now_moving);
-    }
+    checkTrickEnd();
 }
 
 void GameManager::startBidding()
@@ -247,7 +226,7 @@ void GameManager::startGame()
     updateNowMoving();
     game.current_trick = 0;
     game.tricks[0].first = game.now_moving;
-    infoPrint("First trick will be started by: " + game.now_moving);
+    infoPrint("First trick will be started by: " + printer::printPosition(game.now_moving));
     server->sendToAllClients(command_creator.serverGetBidEndCommand(game.declarer, game.contract));
     game.state = GameState::PLAYING;
 }
@@ -314,6 +293,30 @@ void GameManager::endGame()
 void GameManager::revealDummysCards()
 {
     server->sendToAllClients(command_creator.serverGetDummyCardInfoCommand(utils::getPartnerPosition(game.declarer), players[utils::getPartnerPosition(game.declarer)].hand));
+}
+
+void GameManager::checkTrickEnd()
+{
+    if (game.getCurentTrick().first == game.now_moving) // trick is ended
+    {
+        utils::setWinner(game.tricks[game.current_trick], game.contract.trump);
+        if(game.tricks[game.current_trick].winner == game.declarer || game.tricks[game.current_trick].winner == utils::getPartnerPosition(game.declarer))
+        {
+            game.dealer_won_tricks++;
+        }
+        server->sendToAllClients(command_creator.serverGetTrickResultCommand(game.getCurentTrick().winner));
+        game.now_moving = game.getCurentTrick().winner;
+        game.current_trick++;
+
+        if(game.current_trick == 13)  // game end
+        {
+            endGame();
+        } else
+        {
+            game.tricks[game.current_trick].first = game.now_moving;
+            infoPrint("Next trick will be started by: " + printer::printPosition(game.now_moving));
+        }
+    }
 }
 
 };

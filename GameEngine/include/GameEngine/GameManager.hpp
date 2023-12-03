@@ -46,6 +46,7 @@ class GameManager
     void updateNowMoving();
     void updateBidder();
     void endGame();
+    void checkTrickEnd();
 };
 
 };

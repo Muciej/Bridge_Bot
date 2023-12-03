@@ -41,5 +41,5 @@ TEST(PrinterTest, PrintNonEmptyHandTest)
 TEST(PrinterTest, SortedPrintNonEmptyHandTest)
 {
     auto hand = example_hand;
-    EXPECT_EQ(printer::printHand(hand), expected_sorted);
+    EXPECT_EQ(printer::printSortedHand(hand), expected_sorted);
 }
