@@ -18,7 +18,7 @@ void HumanPlayer::gameloop()
     {
         server_command = client->popCommandWait();
         // std::cout << server_command << std::endl;
-        history.push_back(server_command);
+        // history.push_back(server_command);
         auto type = commands::parseCommand(server_command, command_vector);
         if( type == "SETPOS")
             executeSetPosCommand(command_vector);
@@ -79,7 +79,8 @@ std::string HumanPlayer::choose_and_generate_command()
     case 3:
         return prapareDummyPlayCommand();
     default:
-        throw std::runtime_error("Control should not reach here");
+        std::cin.ignore();
+        return "";
     }
 }
 
@@ -269,14 +270,15 @@ void HumanPlayer::sendThread()
     while(true)
     {
         std::string cmd = choose_and_generate_command();
-        client->sendCommand(cmd);
+        if (cmd != "")
+            client->sendCommand(cmd);
         printUI();
     }
 }
 
 void HumanPlayer::printUI()
 {
-    std::cout << std::endl;
+    std::cout << std::endl << std::endl;
     for (const auto& command : history)
     {
         std::cout << command << std::endl;
