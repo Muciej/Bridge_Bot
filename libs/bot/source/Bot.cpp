@@ -1,13 +1,52 @@
-#include <bot/Bot.hpp>
-#include <utils/Card.hpp>
 #include <limits>
 #include <vector>
 #include <algorithm>
+#include <bot/Bot.hpp>
+#include <utils/Card.hpp>
+#include <bot/moves_optimizations/MergeSuccessingCards.hpp>
+#include <commands/CommandsUtils.hpp>
 
 namespace bot
 {
 
 using utils::Card;
+
+Bot::Bot(ClientPtr client_ptr, std::string bot_name) : client(std::move(client_ptr)), name(bot_name)
+{
+    move_optimize_chain = std::make_unique<MergeSuccessingCards>();
+}
+
+void Bot::gameloop()
+{
+    GameState state;
+    client->sendCommand("ADD_PLAYER " + name + " BOT");
+    std::string server_command;
+    std::vector<std::string> command_vector;
+    while(true)
+    {
+        server_command = client->popCommandWait();
+        auto type = commands::parseCommand(server_command, command_vector);
+        if( type == "SETPOS")
+            executeSetPosCommand(command_vector);
+        else if( type == "HAND")
+            executeHandCommand(command_vector);
+        else if( type == "BIDDER")
+            executeBidderCommand(command_vector);
+        else if( type == "BID")
+            executeBidCommand(command_vector);
+        else if( type == "BIDEND")
+            executeBidendCommand(command_vector);
+        else if( type == "PLAY")
+            executePlayCommand(command_vector);
+        else if( type == "TRICKEND")
+            executeTrickendCommand(command_vector);
+        else if( type == "GAMEEND")
+            executeGameendCommand(command_vector);
+        else if( type == "DUMMY_HAND")
+            executeDummyHandCommand(command_vector);
+    }
+    
+}
 
 Card Bot::evaluateNextMove(const GameState& state)
 {
@@ -68,17 +107,66 @@ int Bot::evaluateNextMoveDetails(const GameState& state, int depth, int alpha, i
     }
 }
 
-std::vector<Move> generateMoves(const State& state)
+std::vector<Move> Bot::generateMoves(const GameState& state)
 {
-    std::vector<Move> moves;
-//     generateLegalMoves
-//     launch_optimization_chain
+    std::vector<Move> moves = generateLegalMoves(state);
+    move_optimize_chain->handle(moves);
     return moves;
 }
 
-void generateLegalMoves()
+std::vector<Move> Bot::generateLegalMoves(const GameState& state)
 {
-    
+    std::vector<Move> legal_moves;
+
+    // TODO 
+
+    return legal_moves;
 }
 
+void executeSetPosCommand(std::vector<std::string> command_vector)
+{
+
 }
+
+void executeHandCommand(std::vector<std::string> command_vector)
+{
+
+}
+
+void executeBidderCommand(std::vector<std::string> command_vector)
+{
+
+}
+
+void executeBidCommand(std::vector<std::string> command_vector)
+{
+
+}
+
+void executeBidendCommand(std::vector<std::string> command_vector)
+{
+
+}
+
+void executePlayCommand(std::vector<std::string> command_vector)
+{
+
+}
+
+void executeTrickendCommand(std::vector<std::string> command_vector)
+{
+
+}
+
+void executeGameendCommand(std::vector<std::string> command_vector)
+{
+
+}
+
+void executeDummyHandCommand(std::vector<std::string> command_vector)
+{
+
+}
+
+
+} // namespace bot

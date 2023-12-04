@@ -11,4 +11,5 @@ target_link_libraries(${BOT_NAME} PRIVATE
     compiler_flags
     commands
     bot
+    connection
 )
