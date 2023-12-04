@@ -42,6 +42,7 @@ class HumanPlayer
     void executeTrickendCommand(const std::vector<std::string>& command_data);
     void executeGameendCommand(const std::vector<std::string>& command_data);
     void executeDummyHandCommand(const std::vector<std::string>& command_data);
+    void executeErrorCommand(const std::vector<std::string>& command_data);
     void unknownCommand(const std::string& command);
     void sendThread();
     void printUI();

@@ -118,10 +118,10 @@ namespace commands
     /// @param winner_2
     /// @param points_won
     /// @return prepared command
-    /// Format: GAMEEND [ position 1 ] [ position 2 ] [ points won ]
-    string CommandCreator::serverGetGameEndCommand(const utils::Position& winner_1, const utils::Position& winner_2, int points_won)
+    /// Format: GAMEEND [ position 1 ] [ position 2 ] [ tricks declarer won ] [ points won ]
+    string CommandCreator::serverGetGameEndCommand(const utils::Position& winner_1, const utils::Position& winner_2, int declarer_tricks_taken, int points_won)
     {
-        return "GAMEEND " + getPositionString(winner_1) + " " + getPositionString(winner_2) + " " + std::to_string(points_won);
+        return "GAMEEND " + getPositionString(winner_1) + " " + getPositionString(winner_2) + " " + std::to_string(declarer_tricks_taken) + " " + std::to_string(points_won);
     }
 
     /// @brief Returns command with error message for all players

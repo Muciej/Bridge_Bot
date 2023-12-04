@@ -59,8 +59,8 @@ TEST(CommandCreatorTest, ServerTrickResultCmdTest)
 TEST(CommandCreatorTest, ServerGameEndCmdTest)
 {
     commands::CommandCreator creator;
-    const auto cmd = creator.serverGetGameEndCommand(utils::Position::EAST, utils::Position::WEST, 240);
-    ASSERT_EQ(cmd, "GAMEEND EAST WEST 240");
+    const auto cmd = creator.serverGetGameEndCommand(utils::Position::EAST, utils::Position::WEST, 10, 240);
+    ASSERT_EQ(cmd, "GAMEEND EAST WEST 10 240");
 }
 
 TEST(CommandCreatorTest, ServerErrorAllCmdTest)

@@ -17,8 +17,6 @@ void HumanPlayer::gameloop()
     while(true)
     {
         server_command = client->popCommandWait();
-        // std::cout << server_command << std::endl;
-        // history.push_back(server_command);
         auto type = commands::parseCommand(server_command, command_vector);
         if( type == "SETPOS")
             executeSetPosCommand(command_vector);
@@ -49,7 +47,6 @@ void HumanPlayer::gameloop()
 
 void HumanPlayer::show_available_commands()
 {
-    // std::cout << printer::printSortedHand(hand);
     std::cout << std::endl;
     std::cout << "Available commands: " << std::endl
               << "1. BID" << std::endl
@@ -79,7 +76,7 @@ std::string HumanPlayer::choose_and_generate_command()
     case 3:
         return prapareDummyPlayCommand();
     default:
-        std::cin.ignore();
+        std::cin.ignore(100);
         return "";
     }
 }
@@ -94,27 +91,21 @@ void HumanPlayer::executeSetPosCommand(const std::vector<std::string>& command_d
         position = commands::getPositionFromString(command_data[2]);
         prev_position = utils::getPrevPosition(position);
     }
-
-    // std::cout << "Assigned position: " << command_data[2] << std::endl;
     history.push_back("Assigned position: " + command_data[2]);
 }
 
 void HumanPlayer::executeBidderCommand(const std::vector<std::string>& command_data)
 {
-    // std::cout << "Auction has started! First bid will be placed by: " << command_data[1] << std::endl;
     history.push_back("Auction has started! First bid will be placed by: " + command_data[1]);
 }
 
 void HumanPlayer::executeBidCommand(const std::vector<std::string>& command_data)
 {
-    // std::cout << command_data[1] << " bidded: " << command_data[3] << " " << command_data[2] << std::endl;
     history.push_back(command_data[1] + " bidded: " + command_data[3] + " " + command_data[2]);
 }
 
 void HumanPlayer::executeBidendCommand(const std::vector<std::string>& command_data)
 {
-    // std::cout << "Auction ended! The declarer is " << command_data[1] << " and the contract is: "
-    //           << command_data[3] << " " << command_data[2] << std::endl;
     history.push_back("Auction ended! The declarer is " + command_data[1] + " and the contract is: "
                                                         + command_data[3] + " " + command_data[2]);
     auto declarer = commands::getPositionFromString(command_data[1]);
@@ -123,7 +114,6 @@ void HumanPlayer::executeBidendCommand(const std::vector<std::string>& command_d
 
 void HumanPlayer::executePlayCommand(const std::vector<std::string>& command_data)
 {
-    // std::cout << command_data[1] << " played: " << command_data[2] << std::endl;
     history.push_back(command_data[1] + " played: " + command_data[2]);
     if(commands::getPositionFromString(command_data[1]) == position)
     {
@@ -137,15 +127,13 @@ void HumanPlayer::executePlayCommand(const std::vector<std::string>& command_dat
 
 void HumanPlayer::executeTrickendCommand(const std::vector<std::string>& command_data)
 {
-    // std::cout << command_data[1] << " won the trick!" << std::endl << std::endl;
     history.push_back(command_data[1] + " won the trick!\n");
 }
 
 void HumanPlayer::executeGameendCommand(const std::vector<std::string>& command_data)
 {
-    // std::cout << "Game ended!" << std::endl
-    //           << "winners are: " << command_data[1] << "/" << command_data[2];
-    std::string command = std::string("Game ended! ") + "Winners are: " + command_data[1] + "/" + command_data[2] + "\n";
+    std::string command = std::string("Game ended! ") + "Winners are: " + command_data[1] + "/" + command_data[2] + "\n"
+                                                      + "The declarer took " + command_data[3];
     history.push_back(command);
 }
 
@@ -164,7 +152,6 @@ void HumanPlayer::executeHandCommand(const std::vector<std::string>& command_dat
 
 void HumanPlayer::unknownCommand(const std::string& command)
 {
-    // std::cerr << "Received unknown command from the server: " << command << std::endl;
     history.push_back(std::string("Received unknown command from the server: ") + command);
 }
 
@@ -291,4 +278,16 @@ void HumanPlayer::printUI()
         std::cout << "Your hand: " << printer::printSortedHand(hand.value()) << std::endl;
 
     show_available_commands();
+}
+
+void HumanPlayer::executeErrorCommand(const std::vector<std::string>& command_data)
+{
+    std::string err_msg;
+    for(const auto& s : command_data)
+    {
+        if (s == "ERROR")
+            continue;
+        else err_msg += s;
+    }
+    history.push_back(err_msg);
 }

@@ -19,7 +19,7 @@ class CommandCreator
     string serverGetStartBiddingCommand(const utils::Position& dealer_position);
     string serverGetBidEndCommand(const utils::Position& position, const utils::Bid& bid);
     string serverGetTrickResultCommand(const utils::Position& winner);
-    string serverGetGameEndCommand(const utils::Position& winner_1, const utils::Position& winner_2, int points_won);
+    string serverGetGameEndCommand(const utils::Position& winner_1, const utils::Position& winner_2, int declarer_tricks_taken, int points_won);
     string serverGetErrorMsgAllCommand(const string& msg);
     string serverGetErrorMsgCommand(const utils::Position& position, const string& msg);
 

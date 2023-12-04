@@ -263,12 +263,12 @@ bool GameManager::isCommandLegal(int desired_cmd_length, GameState required_stat
 
 void GameManager::updateNowMoving()
 {
-    game.now_moving = static_cast<utils::Position>((static_cast<int>(game.now_moving) + 1)%4);
+    game.now_moving = utils::getNextPosition(game.now_moving);
 }
 
 void GameManager::updateBidder()
 {
-    bidder = static_cast<utils::Position>((static_cast<int>(game.now_moving) + 1)%4);
+    bidder = utils::getNextPosition(bidder);
 }
 
 /// @brief Handles game end, send info about results and restarts game
@@ -277,11 +277,12 @@ void GameManager::endGame()
     infoPrint("Game ended, sending score info");
     auto winners = game.getWinners();
     auto score = game.getScore();
-    server->sendToAllClients(command_creator.serverGetGameEndCommand(winners.first, winners.second, score));
+    server->sendToAllClients(command_creator.serverGetGameEndCommand(winners.first, winners.second, game.dealer_won_tricks, score));
     game = utils::Game();   // game reset
     if (isGameFull())
     {
         updateBidder();
+        generateAndSendDeck();
         startBidding();
     } else
     {
