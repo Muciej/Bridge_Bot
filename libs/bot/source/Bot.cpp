@@ -18,32 +18,31 @@ Bot::Bot(ClientPtr client_ptr, std::string bot_name) : client(std::move(client_p
 
 void Bot::gameloop()
 {
-    GameState state;
     client->sendCommand("ADD_PLAYER " + name + " BOT");
     std::string server_command;
-    std::vector<std::string> command_vector;
+    std::vector<std::string> command_data;
     while(true)
     {
         server_command = client->popCommandWait();
-        auto type = commands::parseCommand(server_command, command_vector);
+        auto type = commands::parseCommand(server_command, command_data);
         if( type == "SETPOS")
-            executeSetPosCommand(command_vector);
+            executeSetPosCommand(command_data);
         else if( type == "HAND")
-            executeHandCommand(command_vector);
+            executeHandCommand(command_data);
         else if( type == "BIDDER")
-            executeBidderCommand(command_vector);
+            executeBidderCommand(command_data);
         else if( type == "BID")
-            executeBidCommand(command_vector);
+            executeBidCommand(command_data);
         else if( type == "BIDEND")
-            executeBidendCommand(command_vector);
+            executeBidendCommand(command_data);
         else if( type == "PLAY")
-            executePlayCommand(command_vector);
+            executePlayCommand(command_data);
         else if( type == "TRICKEND")
-            executeTrickendCommand(command_vector);
+            executeTrickendCommand(command_data);
         else if( type == "GAMEEND")
-            executeGameendCommand(command_vector);
+            executeGameendCommand(command_data);
         else if( type == "DUMMY_HAND")
-            executeDummyHandCommand(command_vector);
+            executeDummyHandCommand(command_data);
     }
     
 }
@@ -123,49 +122,60 @@ std::vector<Move> Bot::generateLegalMoves(const GameState& state)
     return legal_moves;
 }
 
-void executeSetPosCommand(std::vector<std::string> command_vector)
-{
+    utils::Bid evaluateNextBid(const GameState& state);
 
+
+void Bot::executeSetPosCommand(std::vector<std::string> command_data)
+{
+    if (command_data[1] != name)
+    {
+        return;
+    } else
+    {
+        position = commands::getPositionFromString(command_data[2]);
+    }
 }
 
-void executeHandCommand(std::vector<std::string> command_vector)
+void Bot::executeHandCommand(std::vector<std::string> command_data)
 {
-
+    // update bot cards
 }
 
-void executeBidderCommand(std::vector<std::string> command_vector)
+void Bot::executeBidderCommand(std::vector<std::string> command_data)
 {
-
+    // check if bot is the bidder and place bid if so
 }
 
-void executeBidCommand(std::vector<std::string> command_vector)
+void Bot::executeBidCommand(std::vector<std::string> command_data)
 {
-
+    // adjust card situation according to the placed bid
 }
 
-void executeBidendCommand(std::vector<std::string> command_vector)
+void Bot::executeBidendCommand(std::vector<std::string> command_data)
 {
-
+    current_state.declarer_pos = commands::getPositionFromString(command_data[1]);
 }
 
-void executePlayCommand(std::vector<std::string> command_vector)
+void Bot::executePlayCommand(std::vector<std::string> command_data)
 {
-
+    // adjust current situation accordingly
+    // check if it's bot move now
 }
 
-void executeTrickendCommand(std::vector<std::string> command_vector)
+void Bot::executeTrickendCommand(std::vector<std::string> command_data)
 {
-
+    // adjust current state
+    // check if it's bot move now
 }
 
-void executeGameendCommand(std::vector<std::string> command_vector)
+void Bot::executeGameendCommand(std::vector<std::string> command_data)
 {
-
+    // restart bot to initial state
 }
 
-void executeDummyHandCommand(std::vector<std::string> command_vector)
+void Bot::executeDummyHandCommand(std::vector<std::string> command_data)
 {
-
+    // adjust situation by adding dummy's card
 }
 
 
