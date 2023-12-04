@@ -10,4 +10,5 @@ target_include_directories(${BOT_NAME} PRIVATE ../include)
 target_link_libraries(${BOT_NAME} PRIVATE
     compiler_flags
     commands
+    bot
 )

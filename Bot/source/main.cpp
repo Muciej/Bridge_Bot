@@ -1,5 +1,6 @@
 #include <iostream>
 #include <commands/QueueContainer.hpp>
+#include <bot/Bot.hpp>
 
 int main(){
 
