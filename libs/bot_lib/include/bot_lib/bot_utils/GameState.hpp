@@ -1,5 +1,6 @@
 #pragma once
 #include <utils/Card.hpp>
+#include <utils/Player.hpp>
 
 namespace bot
 {

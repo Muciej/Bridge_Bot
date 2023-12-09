@@ -5,6 +5,7 @@ set(SOURCES
     moves_optimizations/MergeSuccessingCards.cpp
     state_evaluator/BaseEvaluator.cpp
     bid_evaluator/BidEvaluator.cpp
+    bot_utils/MovesGenerator.cpp
 )
 
 add_library(${BOT_LIB_NAME} ${SOURCES} ${HEADER_LIST})

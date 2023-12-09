@@ -6,8 +6,8 @@
 #include <bot_lib/bot_utils/GlobalGameState.hpp>
 #include <bot_lib/state_evaluator/Evaluator.hpp>
 #include <bot_lib/bot_utils/Move.hpp>
-#include <bot_lib/moves_optimizations/MoveOptimizer.hpp>
 #include <bot_lib/bid_evaluator/BidEvaluator.hpp>
+#include <bot_lib/bot_utils/MovesGenerator.hpp>
 #include <utils/Card.hpp>
 #include <utils/Player.hpp>
 #include <commands/CommandCreator.hpp>
@@ -26,14 +26,13 @@ class Bot
 
     public:
     int evaluation_depth = 5;
-    utils::Position now_moving;
     GameState current_state;
     GlobalGameState global_game_state;
     ClientPtr client;
-    std::unique_ptr<Evaluator> evaluator;
-    std::unique_ptr<MoveOptimizer> move_optimize_chain;
+    std::unique_ptr<Evaluator> state_evaluator;
     std::unique_ptr<BidEvaluator> bid_evaluator;
     commands::CommandCreator command_creator;
+    MoveGenerator move_generator;
 
     // main functions
     Bot(std::string bot_name, ClientPtr client_ptr);
@@ -41,14 +40,7 @@ class Bot
 
     // bot functions
     utils::Card evaluateNextMove(const GameState& state);
-    void generateStatesAfterEachMove(const std::vector<Move>& moves);
-    std::vector<Move> generateMoves(const GameState& state);
-    std::vector<Move> generateLegalMoves(const GameState& state);
-    std::vector<Move> generateLegalMovesTrickStart(const GameState& state);
-    std::vector<Move> generateLegalMovesTrickContinue(const GameState& state);
     utils::Bid evaluateNextBid(const GameState& state);
-    void updateCurrentStateAfterBid();
-    void updateStateAfterMove(GameState& state, int played_card, const utils::Position& played_position);
     void resetPoints(utils::Position position);
 
     // server interaction functions
