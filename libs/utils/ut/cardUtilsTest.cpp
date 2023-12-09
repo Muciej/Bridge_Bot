@@ -42,3 +42,27 @@ TEST(CardUtilsTest, isCardInHandTrueTest)
     auto hand = example_hand;
     EXPECT_TRUE(utils::isCardInHand(hand, Card(RoyalRank::JACK, Suit::DIAMONDS)));
 }
+
+TEST(CardUtilsTest, getCardAsIntDiamondsTest)
+{
+    Card c(7, Suit::DIAMONDS);
+    EXPECT_EQ(utils::getCardAsInt(c), 13 + 5);
+}
+
+TEST(CardUtilsTest, getCardAsIntClubsTest)
+{
+    Card c(2, Suit::CLUBS);
+    EXPECT_EQ(utils::getCardAsInt(c), 0);
+}
+
+TEST(CardUtilsTest, getCardAsIntHeartsTest)
+{
+    Card c(10, Suit::HEARTS);
+    EXPECT_EQ(utils::getCardAsInt(c), 26 + 8);
+}
+
+TEST(CardUtilsTest, getCardAsIntSpadesTest)
+{
+    Card c(RoyalRank::ACE, Suit::SPADES);
+    EXPECT_EQ(utils::getCardAsInt(c), 39 + 12);
+}
