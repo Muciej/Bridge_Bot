@@ -27,4 +27,11 @@ int getCardAsInt(const Card& card)
     return ( (static_cast<int>(card.suit) * 13) + static_cast<int>(card.rank) - 2);
 }
 
+Card getCardFromInt(int card_int)
+{
+    char rank = (card_int % 13) + 2;
+    Suit suit = static_cast<Suit>(card_int / 13);
+    return Card(rank, suit);
+}
+
 } // namespace utils

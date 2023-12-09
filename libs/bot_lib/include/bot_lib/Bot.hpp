@@ -7,6 +7,7 @@
 #include <bot_lib/state_evaluator/Evaluator.hpp>
 #include <bot_lib/bot_utils/Move.hpp>
 #include <bot_lib/moves_optimizations/MoveOptimizer.hpp>
+#include <bot_lib/bid_evaluator/BidEvaluator.hpp>
 #include <utils/Card.hpp>
 #include <utils/Player.hpp>
 #include <commands/CommandCreator.hpp>
@@ -31,6 +32,7 @@ class Bot
     ClientPtr client;
     std::unique_ptr<Evaluator> evaluator;
     std::unique_ptr<MoveOptimizer> move_optimize_chain;
+    std::unique_ptr<BidEvaluator> bid_evaluator;
     commands::CommandCreator command_creator;
 
     // main functions
@@ -42,9 +44,11 @@ class Bot
     void generateStatesAfterEachMove(const std::vector<Move>& moves);
     std::vector<Move> generateMoves(const GameState& state);
     std::vector<Move> generateLegalMoves(const GameState& state);
+    std::vector<Move> generateLegalMovesTrickStart(const GameState& state);
+    std::vector<Move> generateLegalMovesTrickContinue(const GameState& state);
     utils::Bid evaluateNextBid(const GameState& state);
     void updateCurrentStateAfterBid();
-    void updateStateAfterMove(GameState& state, const utils::Card& played_card, const utils::Position& played_position);
+    void updateStateAfterMove(GameState& state, int played_card, const utils::Position& played_position);
     void resetPoints(utils::Position position);
 
     // server interaction functions

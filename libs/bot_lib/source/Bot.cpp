@@ -55,17 +55,18 @@ void Bot::gameloop()
 Card Bot::evaluateNextMove(const GameState& state)
 {
     auto moves = generateMoves(state);
+    generateStatesAfterEachMove(moves);
     int max = std::numeric_limits<int>::max();
-    Card best_card_to_play;
+    int best_card_to_play;
     for (const auto& move : moves)
     {
         int eval = evaluateNextMoveDetails(move.state_after, evaluation_depth, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), true);
-        if (eval < max)
+        if (eval > max)
         {
             best_card_to_play = move.placed_card;
         }
     }
-    return best_card_to_play;
+    return utils::getCardFromInt(best_card_to_play);
 }
 
 int Bot::evaluateNextMoveDetails(const GameState& state, int depth, int alpha, int beta, bool maximize)
@@ -118,21 +119,78 @@ std::vector<Move> Bot::generateMoves(const GameState& state)
 
 std::vector<Move> Bot::generateLegalMoves(const GameState& state)
 {
-    std::vector<Move> legal_moves;
-
-    // TODO
-
-    return legal_moves;
+    return state.in_trick ? generateLegalMovesTrickContinue(state) : generateLegalMovesTrickStart(state);
 }
+
+std::vector<Move> Bot::generateLegalMovesTrickContinue(const GameState& state)
+{
+    std::vector<Move> moves;
+    char first_suit_index = static_cast<char>(state.card_played_by_opponents.suit) * 13;
+    for(char i = first_suit_index; i<first_suit_index + 13; i++)
+    {
+        if( state.player_cards_points[static_cast<int>(global_game_state.bot_position)][i] > 0 ||
+            state.player_cards_points[static_cast<int>(global_game_state.bot_partner_posititon)][i] > 0)
+        {
+            moves.push_back(Move(i));
+        }
+    }
+
+    if(moves.size() == 0)   // our pair does not have cards in this suit, so all others are allowed
+    {
+        for(int i = 0; i<52; i++)
+        {
+            if( state.player_cards_points[static_cast<int>(global_game_state.bot_position)][i] > 0 ||
+            state.player_cards_points[static_cast<int>(global_game_state.bot_partner_posititon)][i] > 0)
+            {
+                moves.push_back(Move(i));
+            }
+        }
+    }
+    return moves;
+}
+
+std::vector<Move> Bot::generateLegalMovesTrickStart(const GameState& state)
+{
+    std::vector<Move> moves;
+    bool possessed_colors[] = {false, false, false, false};
+    for(int i = 0; i<52; i++)
+    {
+        if( state.player_cards_points[static_cast<int>(global_game_state.bot_position)][i] > 0)
+        {
+            moves.push_back(Move(i));
+            possessed_colors[i/13] = true;
+        }
+    }
+    for(int j = 0; j<4; j++)
+    {
+        if(possessed_colors[j])
+        {
+            int start = 13 * j;
+            for(int i = start; i< start + 13; i++)
+            {
+                if( state.player_cards_points[static_cast<int>(global_game_state.bot_partner_posititon)][i] > 0)
+                {
+                    moves.push_back(Move(i));
+                }
+            }
+        }
+    }
+    return moves;
+}
+
 
 utils::Bid Bot::evaluateNextBid(const GameState& state)
 {
-    return utils::Bid();
+    auto next_bid = bid_evaluator->evalueNextBid(state, global_game_state);
+    return next_bid;
 }
 
 void Bot::generateStatesAfterEachMove(const std::vector<Move>& moves)
 {
-
+    for(auto move : moves)
+    {
+        updateStateAfterMove(move.state_after, move.placed_card, );
+    }
 }
 
 void Bot::init_current_state()
@@ -148,9 +206,14 @@ void Bot::updateCurrentStateAfterBid()
     // recalculate points
 }
 
-void Bot::updateStateAfterMove(GameState& state, const utils::Card& played_card, const utils::Position& played_position)
+void Bot::updateStateAfterMove(GameState& state, int played_card, const utils::Position& played_position)
 {
     // adjust point in each player table
+    for(int i = 0; i<4; i++)
+    {
+        current_state.player_cards_points[i][played_card] = 0;
+    }
+    if(state.in_trick && )
 }
 
 
@@ -162,6 +225,7 @@ void Bot::executeSetPosCommand(std::vector<std::string> command_data)
     } else
     {
         global_game_state.bot_position = commands::getPositionFromString(command_data[2]);
+        global_game_state.bot_partner_posititon = utils::getPartnerPosition(global_game_state.bot_position);
     }
 }
 

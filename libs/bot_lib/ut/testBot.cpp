@@ -40,10 +40,12 @@ TEST(BotTest, SetPosCommandReactionTest)
     std::vector<std::string> command_data{"SETPOS", "Bot_test", "EAST"};
     bot.executeSetPosCommand(command_data);
     EXPECT_EQ(bot.global_game_state.bot_position, utils::Position::EAST);
+    EXPECT_EQ(bot.global_game_state.bot_partner_posititon, utils::Position::WEST);
 
     command_data = std::vector<std::string>{"SETPOS", "Player", "NORTH"};
     bot.executeSetPosCommand(command_data);
     EXPECT_EQ(bot.global_game_state.bot_position, utils::Position::EAST);
+    EXPECT_EQ(bot.global_game_state.bot_partner_posititon, utils::Position::WEST);
 }
 
 TEST(BotTest, HandCommandShouldNotReactTest)

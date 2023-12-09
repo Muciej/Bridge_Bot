@@ -8,9 +8,12 @@ namespace bot
 
 struct Move
 {
-    utils::Card placed_card;
+    int placed_card;
     GameState state_after;
     int evaluation;
+
+    Move() = default;
+    Move(int card) : placed_card(card) {};
 };
 
 
