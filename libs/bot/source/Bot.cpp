@@ -11,14 +11,16 @@ namespace bot
 
 using utils::Card;
 
-Bot::Bot(ClientPtr client_ptr, std::string bot_name) : client(std::move(client_ptr)), name(bot_name)
+Bot::Bot(std::string bot_name, ClientPtr client_ptr) : client(std::move(client_ptr))
 {
+    global_game_state.bot_name = bot_name;
     move_optimize_chain = std::make_unique<MergeSuccessingCards>();
+    init_current_state();
 }
 
 void Bot::gameloop()
 {
-    client->sendCommand("ADD_PLAYER " + name + " BOT");
+    client->sendCommand("ADD_PLAYER " + global_game_state.bot_name + " BOT");
     std::string server_command;
     std::vector<std::string> command_data;
     while(true)
@@ -44,12 +46,11 @@ void Bot::gameloop()
         else if( type == "DUMMY_HAND")
             executeDummyHandCommand(command_data);
     }
-    
+
 }
 
 Card Bot::evaluateNextMove(const GameState& state)
 {
-//     start measuring
     auto moves = generateMoves(state);
     int max = std::numeric_limits<int>::max();
     Card best_card_to_play;
@@ -61,8 +62,6 @@ Card Bot::evaluateNextMove(const GameState& state)
             best_card_to_play = move.placed_card;
         }
     }
-//     stop measuring
-//     add measure to history
     return best_card_to_play;
 }
 
@@ -71,9 +70,10 @@ int Bot::evaluateNextMoveDetails(const GameState& state, int depth, int alpha, i
     if( depth == 0 || state.game_end )
     {
         return evaluator->evaluate(state);
-    } 
+    }
 
     auto moves = generateMoves(state);
+    generateStatesAfterEachMove(moves);
     int eval;
 
     if ( maximize )
@@ -117,22 +117,40 @@ std::vector<Move> Bot::generateLegalMoves(const GameState& state)
 {
     std::vector<Move> legal_moves;
 
-    // TODO 
+    // TODO
 
     return legal_moves;
 }
 
-    utils::Bid evaluateNextBid(const GameState& state);
+utils::Bid evaluateNextBid(const GameState& state)
+{
+    return utils::Bid();
+}
 
+void Bot::generateStatesAfterEachMove(const std::vector<Move>& moves)
+{
+
+}
+
+void Bot::init_current_state()
+{
+    for(int i = 0; i<=4; i++)
+    {
+        for(int j = 0; j<52; j++)
+        {
+            current_state.player_cards_points[i][j] = 0;
+        }
+    }
+}
 
 void Bot::executeSetPosCommand(std::vector<std::string> command_data)
 {
-    if (command_data[1] != name)
+    if (command_data[1] != global_game_state.bot_name)
     {
         return;
     } else
     {
-        position = commands::getPositionFromString(command_data[2]);
+        global_game_state.bot_position = commands::getPositionFromString(command_data[2]);
     }
 }
 
@@ -153,7 +171,7 @@ void Bot::executeBidCommand(std::vector<std::string> command_data)
 
 void Bot::executeBidendCommand(std::vector<std::string> command_data)
 {
-    current_state.declarer_pos = commands::getPositionFromString(command_data[1]);
+    global_game_state.declarer_pos = commands::getPositionFromString(command_data[1]);
 }
 
 void Bot::executePlayCommand(std::vector<std::string> command_data)

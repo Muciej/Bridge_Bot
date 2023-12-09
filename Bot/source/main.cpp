@@ -12,7 +12,7 @@ int main(){
     clientPtr->startConnection("localhost", 12345);
     std::string name;
     std::cin >> name;
-    bot::Bot bot(std::move(clientPtr), name);
+    bot::Bot bot(name, std::move(clientPtr));
     bot.gameloop();
 
     return 0;

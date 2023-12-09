@@ -1,20 +1,18 @@
 #pragma once
-#include <utils/Player.hpp>
-#include <utils/Bid.hpp>
+#include <utils/Card.hpp>
 
 namespace bot
 {
 
 struct GameState
 {
-    // some form of info about cards and probability of their ownership
-    // bots pair tricks won
-    // bool in_trick
-    // Card highest card played by ohter pair
-    utils::Position declarer_pos;
-    utils::Bid contract;
+    utils::Card card_played_by_opponents;
+    unsigned int player_cards_points[4][52];
+    char pair_tricks_won = 0;
+    char current_trick_no = 1;
+    bool in_trick = false;
     bool maximize;
-    bool game_end;
+    bool game_end = false;
 };
 
 } // namespace bot
