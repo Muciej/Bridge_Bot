@@ -1,10 +1,10 @@
 #include <limits>
 #include <vector>
 #include <algorithm>
-#include <bot/Bot.hpp>
+#include <bot_lib/Bot.hpp>
 #include <utils/Card.hpp>
 #include <utils/CardsUtils.hpp>
-#include <bot/moves_optimizations/MergeSuccessingCards.hpp>
+#include <bot_lib/moves_optimizations/MergeSuccessingCards.hpp>
 #include <commands/CommandsUtils.hpp>
 
 namespace bot

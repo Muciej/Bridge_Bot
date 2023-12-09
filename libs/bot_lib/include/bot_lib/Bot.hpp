@@ -2,11 +2,11 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include <bot/bot_utils/GameState.hpp>
-#include <bot/bot_utils/GlobalGameState.hpp>
-#include <bot/evaluator/Evaluator.hpp>
-#include <bot/bot_utils/Move.hpp>
-#include <bot/moves_optimizations/MoveOptimizer.hpp>
+#include <bot_lib/bot_utils/GameState.hpp>
+#include <bot_lib/bot_utils/GlobalGameState.hpp>
+#include <bot_lib/evaluator/Evaluator.hpp>
+#include <bot_lib/bot_utils/Move.hpp>
+#include <bot_lib/moves_optimizations/MoveOptimizer.hpp>
 #include <utils/Card.hpp>
 #include <utils/Player.hpp>
 #include <commands/CommandCreator.hpp>

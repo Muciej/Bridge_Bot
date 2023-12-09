@@ -9,11 +9,10 @@ namespace connection
 
 class FakeClient : public Client
 {
-    private:
+    public:
     std::vector<std::string> sent;
     std::vector<std::string> to_receive;
 
-    public:
     FakeClient() = default;
     FakeClient(std::vector<std::string>& _to_receive) : to_receive(std::move(_to_receive)) {};
     bool startConnection(const std::string& host, const in_port_t& port);

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <utility>
 #include <string>
-#include <bot/Bot.hpp>
+#include <bot_lib/Bot.hpp>
 #include <commands/QueueContainer.hpp>
 #include <connection/TcpClient.hpp>
 #include <connection/Client.hpp>

@@ -1,4 +1,4 @@
-#include <bot/moves_optimizations/MergeSuccessingCards.hpp>
+#include <bot_lib/moves_optimizations/MergeSuccessingCards.hpp>
 
 namespace bot
 {
