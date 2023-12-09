@@ -6,6 +6,7 @@
 #include <utils/CardsUtils.hpp>
 #include <bot_lib/moves_optimizations/MergeSuccessingCards.hpp>
 #include <commands/CommandsUtils.hpp>
+#include <bot_lib/state_evaluator/BaseEvaluator.hpp>
 
 namespace bot
 {
@@ -16,6 +17,7 @@ Bot::Bot(std::string bot_name, ClientPtr client_ptr) : client(std::move(client_p
 {
     global_game_state.bot_name = bot_name;
     move_optimize_chain = std::make_unique<MergeSuccessingCards>();
+
     init_current_state();
 }
 
@@ -70,7 +72,7 @@ int Bot::evaluateNextMoveDetails(const GameState& state, int depth, int alpha, i
 {
     if( depth == 0 || state.game_end )
     {
-        return evaluator->evaluate(state);
+        return evaluator->evaluateState(state, global_game_state);
     }
 
     auto moves = generateMoves(state);
@@ -135,7 +137,7 @@ void Bot::generateStatesAfterEachMove(const std::vector<Move>& moves)
 
 void Bot::init_current_state()
 {
-    for(int i = 0; i<=4; i++)
+    for(int i = 0; i<4; i++)
     {
         resetPoints(static_cast<utils::Position>(i));
     }
@@ -268,7 +270,7 @@ void Bot::executeGameendCommand(std::vector<std::string> command_data)
 
 void Bot::resetPoints(utils::Position position)
 {
-    for(int i = 0; i<13; i++)
+    for(int i = 0; i<52; i++)
     {
         current_state.player_cards_points[static_cast<int>(position)][i] = 0;
     }

@@ -4,7 +4,7 @@
 #include <string>
 #include <bot_lib/bot_utils/GameState.hpp>
 #include <bot_lib/bot_utils/GlobalGameState.hpp>
-#include <bot_lib/evaluator/Evaluator.hpp>
+#include <bot_lib/state_evaluator/Evaluator.hpp>
 #include <bot_lib/bot_utils/Move.hpp>
 #include <bot_lib/moves_optimizations/MoveOptimizer.hpp>
 #include <utils/Card.hpp>
