@@ -43,8 +43,7 @@ void Bot::gameloop()
         else if( type == "TRICKEND")
             executeTrickendCommand(command_data);
         else if( type == "GAMEEND")
-            return;
-            // executeGameendCommand(command_data);
+            executeGameendCommand(command_data);
         else if( type == "DUMMY_HAND")
             executeDummyHandCommand(command_data);
     }
@@ -197,8 +196,8 @@ void Bot::executeBidCommand(std::vector<std::string> command_data)
     now_moving = utils::getNextPosition(now_moving);
     if(now_moving == global_game_state.bot_position)
     {
-        auto bid = evaluateNextBid(current_state);
-        client->sendCommand(command_creator.getBidInfoCommand(global_game_state.bot_position, bid));
+        auto bot_bid = evaluateNextBid(current_state);
+        client->sendCommand(command_creator.getBidInfoCommand(global_game_state.bot_position, bot_bid));
     }
 }
 
@@ -258,6 +257,13 @@ void Bot::executeDummyHandCommand(std::vector<std::string> command_data)
         current_state.player_cards_points[static_cast<int>(global_game_state.dummy_position)][utils::getCardAsInt(card)]++;
         current_state.player_cards_points_sum[static_cast<int>(global_game_state.dummy_position)]++;
     }
+}
+
+void Bot::executeGameendCommand(std::vector<std::string> command_data)
+{
+    global_game_state = GlobalGameState();
+    current_state = GameState();
+    init_current_state();
 }
 
 void Bot::resetPoints(utils::Position position)

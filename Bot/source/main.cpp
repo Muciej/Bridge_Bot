@@ -4,6 +4,7 @@
 #include <bot/Bot.hpp>
 #include <commands/QueueContainer.hpp>
 #include <connection/TcpClient.hpp>
+#include <connection/Client.hpp>
 
 int main(){
 

@@ -5,6 +5,7 @@ set(SOURCES
     TcpClient.cpp
     TcpServer.cpp
     FakeServer.cpp
+    FakeClient.cpp
 )
 
 add_library(${CONNECTION_LIB_NAME} ${SOURCES} ${HEADER_LIST})

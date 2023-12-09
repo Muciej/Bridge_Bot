@@ -9,13 +9,13 @@
 #include <bot/moves_optimizations/MoveOptimizer.hpp>
 #include <utils/Card.hpp>
 #include <utils/Player.hpp>
-#include <connection/TcpClient.hpp>
 #include <commands/CommandCreator.hpp>
+#include <connection/Client.hpp>
 
 namespace bot
 {
 
-using ClientPtr = std::unique_ptr<connection::TcpClient>;
+using ClientPtr = std::unique_ptr<connection::Client>;
 
 class Bot
 {
@@ -55,7 +55,7 @@ class Bot
     void executeBidendCommand(std::vector<std::string> command_data);
     void executePlayCommand(std::vector<std::string> command_data);
     void executeTrickendCommand(std::vector<std::string> command_data);
-    // void executeGameendCommand(std::vector<std::string> command_data);
+    void executeGameendCommand(std::vector<std::string> command_data);
     void executeDummyHandCommand(std::vector<std::string> command_data);
 };
 
