@@ -1,6 +1,7 @@
 #pragma once
 #include "../bot_utils/GameState.hpp"
 #include <utils/Card.hpp>
+#include <utils/Player.hpp>
 
 namespace bot
 {

@@ -57,7 +57,6 @@ TEST(BotTest, HandCommandShouldNotReactTest)
     bot.executeHandCommand(example_hand_command_south);
     for(int i = 0; i<4; i++)
     {
-        EXPECT_EQ(bot.current_state.player_cards_points_sum[i], 0);
         for(int j = 0; j<52; j++)
         {
             EXPECT_EQ(bot.current_state.player_cards_points[i][j], 0);
@@ -77,13 +76,11 @@ TEST(BotTest, HandCommandShouldReactTest)
         if(i == 2)
             continue;
 
-        EXPECT_EQ(bot.current_state.player_cards_points_sum[i], 0);
         for(int j = 0; j<52; j++)
         {
             EXPECT_EQ(bot.current_state.player_cards_points[i][j], 0);
         }
     }
-    EXPECT_EQ(bot.current_state.player_cards_points_sum[2], 13);
     for(int j = 0; j < 52; j++)
     {
         if (std::find(example_hand_int_values.begin(), example_hand_int_values.end(), j) != example_hand_int_values.end())

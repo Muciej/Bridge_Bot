@@ -7,10 +7,11 @@ namespace bot
 
 struct GameState
 {
-    utils::Card card_played_by_opponents;
     utils::Position now_moving;
+    utils::Position tricker;
+    utils::Suit trick_suit;
+    int high_card;
     int player_cards_points[4][52];
-    int player_cards_points_sum[4];
     char pair_tricks_won = 0;
     char current_trick_no = 1;
     bool in_trick = false;

@@ -143,8 +143,7 @@ void Bot::executeHandCommand(std::vector<std::string> command_data)
     auto hand = commands::parseHandCommand(command_data, 2);
     for(const auto& card : hand)
     {
-        current_state.player_cards_points[static_cast<int>(global_game_state.bot_position)][utils::getCardAsInt(card)]++;
-        current_state.player_cards_points_sum[global_game_state.bot_position]++;
+        current_state.player_cards_points[static_cast<int>(global_game_state.bot_position)][utils::getCardAsInt(card)] = REQUIRED_LEGAL_SAMPLES;
     }
 }
 
@@ -227,8 +226,7 @@ void Bot::executeDummyHandCommand(std::vector<std::string> command_data)
     resetPoints(current_state, global_game_state.dummy_position);
     for(const auto& card : dummy_hand)
     {
-        current_state.player_cards_points[static_cast<int>(global_game_state.dummy_position)][utils::getCardAsInt(card)]++;
-        current_state.player_cards_points_sum[static_cast<int>(global_game_state.dummy_position)]++;
+        current_state.player_cards_points[static_cast<int>(global_game_state.dummy_position)][utils::getCardAsInt(card)] = REQUIRED_LEGAL_SAMPLES;
     }
 }
 

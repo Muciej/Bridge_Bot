@@ -236,7 +236,6 @@ void BaseBidEvaluator::giveCardsPoints(const std::vector<int>& deal, GameState& 
         {
             state.player_cards_points[i][deal[(i * 13) + j]]++;
         }
-        state.player_cards_points_sum[i] += 13;
     }
 }
 

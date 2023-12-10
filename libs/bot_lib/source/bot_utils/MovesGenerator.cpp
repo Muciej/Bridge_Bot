@@ -1,8 +1,19 @@
 #include <bot_lib/bot_utils/MovesGenerator.hpp>
 #include <bot_lib/moves_optimizations/MergeSuccessingCards.hpp>
+#include <utils/Card.hpp>
+#include <utils/CardsUtils.hpp>
 
 namespace bot
 {
+
+void clearAllInSuit(int card_points[52], utils::Suit suit)
+{
+    auto suit_int = static_cast<int>(suit);
+    for(int i = (13 * suit_int); i < (13 * suit_int) + 13; i++)
+    {
+        card_points[i] = 0;
+    }
+}
 
 MoveGenerator::MoveGenerator()
 {
@@ -15,7 +26,43 @@ std::vector<Move> MoveGenerator::generateMovesSet(const GameState& current_state
     // oczywiście w ujęciu pary
     // pamiętać, żeby stan move.state_after był skopiowany !!!
     std::vector<Move> moves;
+
+
+
     return moves;
+}
+
+void MoveGenerator::updateStateAfterMove(Move& move, const GlobalGameState& global_state)
+{
+    updateCardPoints(move.state_after, move.placed_card, false);
+    bool bot_pair_move = (move.player_placed == global_state.bot_position || move.player_placed == global_state.bot_partner_posititon);
+    if(move.state_after.in_trick)
+    {
+
+    } else
+    {
+        // trick start
+        move.state_after.high_card = move.placed_card;
+        move.state_after.trick_suit = utils::getSuitFromIntCard(move.placed_card);
+        move.state_after.in_trick = true;
+        move.state_after.maximize = !bot_pair_move;
+    }
+}
+
+void MoveGenerator::updateCardPoints(GameState& state, int placed_card, bool check_trick_col)
+{
+    for(int i = 0; i<4 ; i++)
+    {
+        state.player_cards_points[i][placed_card] = 0;
+    }
+    if( check_trick_col && state.in_trick && state.trick_suit != utils::getSuitFromIntCard(placed_card))   // player does not have trick colour
+    {
+        int trick_col = placed_card / 13;
+        for(int i = trick_col * 13; i< (trick_col * 13) + 13; i++)
+        {
+            state.player_cards_points[static_cast<int>(state.now_moving)][i] = 0;
+        }
+    }
 }
 
 } // namespace bot

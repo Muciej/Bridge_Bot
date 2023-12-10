@@ -34,4 +34,9 @@ Card getCardFromInt(int card_int)
     return Card(rank, suit);
 }
 
+Suit getSuitFromIntCard(int card_int)
+{
+    return static_cast<Suit>(card_int / 13);
+}
+
 } // namespace utils
