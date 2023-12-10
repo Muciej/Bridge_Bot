@@ -4,7 +4,7 @@ set(SOURCES
     Bot.cpp
     moves_optimizations/MergeSuccessingCards.cpp
     state_evaluator/BaseEvaluator.cpp
-    bid_evaluator/BidEvaluator.cpp
+    bid_evaluator/BaseBidEvaluator.cpp
     bot_utils/MovesGenerator.cpp
     bot_utils/GameState.cpp
 )

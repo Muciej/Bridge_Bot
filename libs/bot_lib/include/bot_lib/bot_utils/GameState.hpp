@@ -19,5 +19,6 @@ struct GameState
 };
 
 void resetPoints(GameState& state, utils::Position position);
+void getCardProbability(const GameState& state, float cards_prob[52], utils::Position position);
 
 } // namespace bot

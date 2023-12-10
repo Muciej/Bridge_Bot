@@ -10,7 +10,6 @@ struct Move
 {
     int placed_card;
     GameState state_after;
-    int evaluation;
 
     Move() = default;
     Move(int card) : placed_card(card) {};

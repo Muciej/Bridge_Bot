@@ -12,4 +12,9 @@ void resetPoints(GameState& state, utils::Position position)
     state.player_cards_points_sum[static_cast<int>(position)] = 0;
 }
 
+void getCardProbability(const GameState& state, float cards_prob[52], utils::Position position)
+{
+    // TODO
+}
+
 } // namespace bot

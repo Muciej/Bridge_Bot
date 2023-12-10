@@ -112,7 +112,6 @@ int Bot::evaluateNextMoveDetails(const GameState& state, int depth, int alpha, i
 utils::Bid Bot::evaluateNextBid(GameState& state)
 {
     auto next_bid = bid_evaluator->evalueNextBid(state, global_game_state);
-    //bid_evaluator->updateStateAfterBid(state, global_game_state)
     return next_bid;
 }
 
@@ -165,8 +164,7 @@ void Bot::executeBidCommand(std::vector<std::string> command_data)
     // adjust card situation according to the placed bid
     auto bid = commands::parseBidCommand(command_data);
     global_game_state.bidding.push_back(bid);
-    // updateCurrentStateAfterBid();
-    // bid_evaluator->updateStateAfterBid(state, global_game_state);
+    bid_evaluator->updateAfterPlacedBid(current_state, global_game_state);
     current_state.now_moving = utils::getNextPosition(current_state.now_moving);
     if(current_state.now_moving == global_game_state.bot_position)
     {

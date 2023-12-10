@@ -13,7 +13,7 @@ class MoveGenerator
     MoveGenerator();
     std::unique_ptr<MoveOptimizer> move_optimize_chain;
     std::vector<Move> generateMovesSet(const GameState& current_state, const GlobalGameState& global_state);
-
+    void updateState(Move& move);
 };
 
 } // namespace bot
