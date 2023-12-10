@@ -22,7 +22,7 @@ class Bot
 {
     private:
     void init_current_state();
-    int evaluateNextMoveDetails(GameState& state, int depth, int alpha, int beta, bool maximize);
+    int evaluateNextMoveDetails(const GameState& state, int depth, int alpha, int beta, bool maximize);
 
     public:
     int evaluation_depth = 5;

@@ -58,7 +58,7 @@ Card Bot::evaluateNextMove(GameState& state)
     auto moves = move_generator.generateMovesSet(state, global_game_state);
     int max = std::numeric_limits<int>::min();
     int best_card_to_play;
-    for (auto& move : moves)
+    for (const auto& move : moves)
     {
         int eval = evaluateNextMoveDetails(move.state_after, evaluation_depth, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), true);
         if (eval > max)
@@ -69,7 +69,7 @@ Card Bot::evaluateNextMove(GameState& state)
     return utils::getCardFromInt(best_card_to_play);
 }
 
-int Bot::evaluateNextMoveDetails(GameState& state, int depth, int alpha, int beta, bool maximize)
+int Bot::evaluateNextMoveDetails(const GameState& state, int depth, int alpha, int beta, bool maximize)
 {
     if( depth == 0 || state.game_end )
     {
@@ -82,7 +82,7 @@ int Bot::evaluateNextMoveDetails(GameState& state, int depth, int alpha, int bet
     if ( maximize )
     {
         int maxEval = std::numeric_limits<int>::min();
-        for (auto& move : moves)
+        for (const auto& move : moves)
         {
             eval = evaluateNextMoveDetails(move.state_after, depth-1, alpha, beta, false);
             maxEval = std::max(eval, maxEval);

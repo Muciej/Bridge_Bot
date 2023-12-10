@@ -9,10 +9,11 @@ MoveGenerator::MoveGenerator()
     move_optimize_chain = std::make_unique<MergeSuccessingCards>();
 }
 
-std::vector<Move> MoveGenerator::generateMovesSet(GameState& current_state, const GlobalGameState& global_state)
+std::vector<Move> MoveGenerator::generateMovesSet(const GameState& current_state, const GlobalGameState& global_state)
 {
     // zrboić listę dostępnych ruchów dla tego, KTO TERAZ SIĘ RUSZA. Nie dla bota kurde.
     // oczywiście w ujęciu pary
+    // pamiętać, żeby stan move.state_after był skopiowany !!!
     std::vector<Move> moves;
     return moves;
 }

@@ -4,7 +4,7 @@
 namespace utils
 {
 
-enum class Suit
+enum class Suit : char
 {
     CLUBS = 0,
     DIAMONDS = 1,
@@ -12,7 +12,7 @@ enum class Suit
     SPADES = 3,
 };
 
-enum RoyalRank
+enum RoyalRank : char
 {
     JACK = 11,
     QUEEN = 12,
