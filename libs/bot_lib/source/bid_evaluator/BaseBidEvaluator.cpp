@@ -1,5 +1,7 @@
 #include <bot_lib/bid_evaluator/BaseBidEvaluator.hpp>
 #include <utils/Player.hpp>
+#include <utils/Card.hpp>
+#include <utils/CardsUtils.hpp>
 
 namespace bot
 {
@@ -7,7 +9,7 @@ namespace bot
 utils::Bid BaseBidEvaluator::evalueNextBid(const GameState& state, const GlobalGameState& globalState)
 {
     auto ally_params = estimateParams(state, globalState.bot_position);
-    return getBidFromTable(ally_params, globalState.bot_position);
+    return getBidFromTable(ally_params);
 }
 
 void BaseBidEvaluator::updateAfterPlacedBid(GameState& state, const GlobalGameState& global_state)
@@ -22,12 +24,12 @@ void BaseBidEvaluator::updateAfterPlacedBid(GameState& state, const GlobalGameSt
     BiddingParams west_pair;
     if(state.now_moving == utils::Position::NORTH || state.now_moving == utils::Position::NORTH)
     {
-        north_pair = getEstimatedParamsFromContractRequirements(getRequirementsForBid(placed_bid));
+        north_pair = getEstimatedParamsFromContractRequirements(getRequirementsForBid(placed_bid), placed_bid.trump);
         west_pair = estimateParams(state, utils::Position::WEST);
     } else
     {
         north_pair = estimateParams(state, utils::Position::NORTH);
-        west_pair = getEstimatedParamsFromContractRequirements(getRequirementsForBid(placed_bid));
+        west_pair = getEstimatedParamsFromContractRequirements(getRequirementsForBid(placed_bid), placed_bid.trump);
     }
 
     for(int i = 0; i<4; i++)
@@ -100,36 +102,157 @@ BiddingParams BaseBidEvaluator::estimateParams(const GameState& state, const uti
     return params;
 }
 
-
-utils::Bid BaseBidEvaluator::getBidFromTable(const BiddingParams& params, const utils::Position& position)
+bool compareRequirementWithParams(const BiddingParams& params, const ContractRequirements& requirement , const utils::Trump trump)
 {
-    return Bid();
+    bool requirements_satisfied = true;
+    if ( params.all_points < requirement.all_points_min)
+        requirements_satisfied = false;
+
+    if (trump != utils::Trump::NO_TRUMP)
+    {
+        char color_length;
+        char color_points;
+        switch (trump)
+        {
+        case utils::Trump::CLUBS :
+            color_length = params.clubs_cards;
+            color_points = params.clubs_points;
+            break;
+        case utils::Trump::DIAMONDS :
+            color_length = params.diamonds_cards;
+            color_points = params.diamonds_points;
+            break;
+        case utils::Trump::HEARTS :
+            color_length = params.hearts_cards;
+            color_points = params.hearts_points;
+            break;
+        case utils::Trump::SPADES :
+            color_length = params.spades_cards;
+            color_points = params.spades_points;
+            break;
+        default:
+            break;
+        }
+        if (color_length < requirement.colour_length_min || color_points < requirement.colour_points_min)
+            requirements_satisfied = false;
+    }
+    return requirements_satisfied;
+}
+
+utils::Bid BaseBidEvaluator::getBidFromTable(const BiddingParams& params)
+{
+    Bid bid;
+    for(const auto& pair : conract_reuiremets_map)
+    {
+        if(compareRequirementWithParams(params, pair.second, pair.first.trump))
+            bid = pair.first;
+        else
+            break;
+    }
+    return bid;
 }
 
 ContractRequirements BaseBidEvaluator::getRequirementsForBid(const utils::Bid& bid)
 {
-    return ContractRequirements();
+    return conract_reuiremets_map.find(bid)->second;
 }
 
-BiddingParams BaseBidEvaluator::getEstimatedParamsFromContractRequirements(const ContractRequirements& requirements)
+BiddingParams BaseBidEvaluator::getEstimatedParamsFromContractRequirements(const ContractRequirements& requirements, const utils::Trump& trump)
 {
-    return BiddingParams();
+    BiddingParams params;
+    switch (trump)
+    {
+    case utils::Trump::CLUBS :
+        params.clubs_cards = requirements.colour_length_min;
+        params.clubs_points = requirements.colour_points_min;
+        break;
+    case utils::Trump::DIAMONDS :
+        params.diamonds_cards = requirements.colour_length_min;
+        params.diamonds_points = requirements.colour_points_min;
+        break;
+    case utils::Trump::HEARTS :
+        params.hearts_cards = requirements.colour_length_min;
+        params.hearts_points = requirements.colour_points_min;
+        break;
+    case utils::Trump::SPADES :
+        params.spades_cards = requirements.colour_length_min;
+        params.spades_points = requirements.colour_points_min;
+        break;
+    default:
+        break;
+    }
+    params.all_points = requirements.all_points_min;
+    return params;
 }
 
-std::pair<BiddingParams, BiddingParams> BaseBidEvaluator::getParamsFromDeal(const std::vector<int> deal)
+std::pair<BiddingParams, BiddingParams> BaseBidEvaluator::getParamsFromDeal(const std::vector<int>& deal)
 {
-    return std::pair<BiddingParams, BiddingParams>();
+    BiddingParams north_pair, west_pair;
+    utils::Card c;
+    for(int i = 0; i<4; i++)
+    {
+        BiddingParams& current = i%2 == 0 ? north_pair : west_pair;
+        for(int j = 0; j < 13; j++)
+        {
+            c = utils::getCardFromInt(deal[(13*i) + j]);
+            switch (c.suit)
+            {
+            case utils::Suit::CLUBS:
+                current.clubs_points += std::max(c.rank-10, 0);
+                current.clubs_cards++;
+                break;
+            case utils::Suit::DIAMONDS:
+                current.diamonds_points += std::max(c.rank-10, 0);
+                current.diamonds_cards++;
+                break;
+            case utils::Suit::HEARTS:
+                current.hearts_points += std::max(c.rank-10, 0);
+                current.hearts_cards++;
+                break;
+            case utils::Suit::SPADES:
+                current.spades_points += std::max(c.rank-10, 0);
+                current.spades_cards++;
+                break;
+            default:
+                break;
+            }
+            current.all_points += std::max(c.rank-10, 0);
+        }
+    }
+    return {north_pair, west_pair};
 }
 
-bool BaseBidEvaluator::checkDealWithEstimate(const std::vector<int> deal, const BiddingParams& pairNorth, const BiddingParams& pairWest)
+bool BaseBidEvaluator::checkDealWithEstimate(const std::vector<int>& deal, const BiddingParams& pairNorth, const BiddingParams& pairWest)
 {
-    return true;
+    auto params_pair = getParamsFromDeal(deal);
+    return params_pair.first < pairNorth && params_pair.second < pairWest;
 }
 
-void BaseBidEvaluator::giveCardsPoints(const std::vector<int> deal, GameState& state)
+void BaseBidEvaluator::giveCardsPoints(const std::vector<int>& deal, GameState& state)
 {
-
+    for(int i = 0; i<4; i++)
+    {
+        for(int j = 0; j<13; j++)
+        {
+            state.player_cards_points[i][deal[(i * 13) + j]]++;
+        }
+        state.player_cards_points_sum[i] += 13;
+    }
 }
 
+bool operator<(const BiddingParams& b1, const BiddingParams& b2)
+{
+    bool is_ok = true;
+    if( b1.all_points >= b2.all_points) is_ok = false;
+    if( b1.clubs_cards >= b2.clubs_cards) is_ok = false;
+    if( b1.clubs_points >= b2.clubs_points) is_ok = false;
+    if( b1.diamonds_cards >= b2.diamonds_cards) is_ok = false;
+    if( b1.diamonds_points >= b2.diamonds_points) is_ok = false;
+    if( b1.hearts_cards >= b2.hearts_cards) is_ok = false;
+    if( b1.hearts_points >= b2.hearts_points) is_ok = false;
+    if( b1.spades_cards >= b2.spades_cards) is_ok = false;
+    if( b1.spades_points >= b2.spades_points) is_ok = false;
+    return is_ok;
+}
 
 } // namespace bot

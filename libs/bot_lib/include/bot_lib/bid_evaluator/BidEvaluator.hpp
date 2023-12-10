@@ -26,6 +26,8 @@ struct BiddingParams
     char clubs_cards = 0;
 };
 
+bool operator<(const BiddingParams& b1, const BiddingParams& b2);
+
 struct ContractRequirements
 {
     char all_points_min = 0;
