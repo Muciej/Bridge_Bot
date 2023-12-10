@@ -14,7 +14,7 @@ utils::Bid BaseBidEvaluator::evalueNextBid(const GameState& state, const GlobalG
 
 void BaseBidEvaluator::updateAfterPlacedBid(GameState& state, const GlobalGameState& global_state)
 {
-    if( state.now_moving == global_state.bot_position)
+    if( global_state.now_moving == global_state.bot_position)
     {
         return;
     }
@@ -22,7 +22,7 @@ void BaseBidEvaluator::updateAfterPlacedBid(GameState& state, const GlobalGameSt
     const auto& placed_bid = *global_state.bidding.end();
     BiddingParams north_pair;
     BiddingParams west_pair;
-    if(state.now_moving == utils::Position::NORTH || state.now_moving == utils::Position::NORTH)
+    if(global_state.now_moving == utils::Position::NORTH || global_state.now_moving == utils::Position::NORTH)
     {
         north_pair = getEstimatedParamsFromContractRequirements(getRequirementsForBid(placed_bid), placed_bid.trump);
         west_pair = estimateParams(state, utils::Position::WEST);
@@ -40,8 +40,9 @@ void BaseBidEvaluator::updateAfterPlacedBid(GameState& state, const GlobalGameSt
     int legal_samples = 0;
     while(legal_samples < REQUIRED_LEGAL_SAMPLES)
     {
-        // dealer generate deals
         std::vector<int> deal;
+        dealer.dealCardsIntoIntTable(deal);
+        dealer.shuffleDeck();
         if (checkDealWithEstimate(deal, north_pair, west_pair))
         {
             giveCardsPoints(deal, state);

@@ -7,8 +7,8 @@ namespace bot
 
 struct GameState
 {
-    utils::Position now_moving;
     utils::Position tricker;
+    utils::Position placed_high_card;
     utils::Suit trick_suit;
     int high_card;
     int player_cards_points[4][52];

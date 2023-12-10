@@ -3,6 +3,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/${BOT_LIB
 set(SOURCES
     Bot.cpp
     moves_optimizations/MergeSuccessingCards.cpp
+    moves_optimizations/MergeRepeatingCards.cpp
     state_evaluator/BaseEvaluator.cpp
     bid_evaluator/BaseBidEvaluator.cpp
     bot_utils/MovesGenerator.cpp

@@ -150,8 +150,8 @@ void Bot::executeHandCommand(std::vector<std::string> command_data)
 void Bot::executeBidderCommand(std::vector<std::string> command_data)
 {
     // check if bot is the bidder and place bid if so
-    current_state.now_moving = commands::getPositionFromString(command_data[1]);
-    if(current_state.now_moving == global_game_state.bot_position)
+    global_game_state.now_moving = commands::getPositionFromString(command_data[1]);
+    if(global_game_state.now_moving == global_game_state.bot_position)
     {
         auto bid = evaluateNextBid(current_state);
         client->sendCommand(command_creator.getBidInfoCommand(global_game_state.bot_position, bid));
@@ -164,8 +164,8 @@ void Bot::executeBidCommand(std::vector<std::string> command_data)
     auto bid = commands::parseBidCommand(command_data);
     global_game_state.bidding.push_back(bid);
     bid_evaluator->updateAfterPlacedBid(current_state, global_game_state);
-    current_state.now_moving = utils::getNextPosition(current_state.now_moving);
-    if(current_state.now_moving == global_game_state.bot_position)
+    global_game_state.now_moving = utils::getNextPosition(global_game_state.now_moving);
+    if(global_game_state.now_moving == global_game_state.bot_position)
     {
         auto bot_bid = evaluateNextBid(current_state);
         client->sendCommand(command_creator.getBidInfoCommand(global_game_state.bot_position, bot_bid));
@@ -176,9 +176,9 @@ void Bot::executeBidendCommand(std::vector<std::string> command_data)
 {
     global_game_state.declarer_pos = commands::getPositionFromString(command_data[1]);
     global_game_state.dummy_position = utils::getPartnerPosition(global_game_state.declarer_pos);
-    current_state.now_moving = global_game_state.declarer_pos;
+    global_game_state.now_moving = global_game_state.declarer_pos;
     global_game_state.contract = commands::parseBidCommand(command_data);
-    if( current_state.now_moving == global_game_state.bot_position)
+    if( global_game_state.now_moving == global_game_state.bot_position)
     {
         auto card = evaluateNextMove(current_state);
         client->sendCommand(command_creator.getPlayCommand(global_game_state.bot_position, card));
@@ -192,8 +192,8 @@ void Bot::executePlayCommand(std::vector<std::string> command_data)
     auto card_played = commands::parsePlayCommand(command_data);
     // updateStateAfterMove(current_state, card_played, current_state.now_moving);
     // move_generator.updateStateAfterMove(state, global_game_state);
-    current_state.now_moving = utils::getNextPosition(current_state.now_moving);
-    if( current_state.now_moving == global_game_state.bot_position)
+    global_game_state.now_moving = utils::getNextPosition(global_game_state.now_moving);
+    if( global_game_state.now_moving == global_game_state.bot_position)
     {
         auto card = evaluateNextMove(current_state);
         client->sendCommand(command_creator.getPlayCommand(global_game_state.bot_position, card));
@@ -211,8 +211,8 @@ void Bot::executeTrickendCommand(std::vector<std::string> command_data)
         current_state.in_trick = false;
         current_state.current_trick_no++;
     }
-    current_state.now_moving = trick_winner;
-    if( current_state.now_moving == global_game_state.bot_position)
+    global_game_state.now_moving = trick_winner;
+    if( global_game_state.now_moving == global_game_state.bot_position)
     {
         auto card = evaluateNextMove(current_state);
         client->sendCommand(command_creator.getPlayCommand(global_game_state.bot_position, card));

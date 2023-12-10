@@ -5,11 +5,9 @@
 namespace bot
 {
 
-class MergeSuccessingCards : public MoveOptimizer
+class MergeRepeatingCards : public MoveOptimizer
 {
     void handle(std::vector<Move>& moves) override;
 };
 
 } // namespace bot
-
-

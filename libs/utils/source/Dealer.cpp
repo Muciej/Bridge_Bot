@@ -1,5 +1,6 @@
 #include <utils/Dealer.hpp>
 #include <utils/Card.hpp>
+#include <utils/CardsUtils.hpp>
 #include <algorithm>
 #include <ctime>
 #include <vector>
@@ -40,9 +41,12 @@ std::vector<std::vector<Card>> Dealer::dealCards()
     return hands;
 }
 
-void dealCardsIntoIntTable(int hands[4][52])
+void Dealer::dealCardsIntoIntTable(std::vector<int>& deal)
 {
-
+    for(const auto& card : deck)
+    {
+        deal.push_back(utils::getCardAsInt(card));
+    }
 }
 
 };

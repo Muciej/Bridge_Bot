@@ -2,6 +2,7 @@
 #include <vector>
 #include <utils/Player.hpp>
 #include <utils/Bid.hpp>
+#include <utils/Dealer.hpp>
 #include "BidEvaluator.hpp"
 #include "../bot_utils/GameState.hpp"
 #include "../bot_utils/GlobalGameState.hpp"
@@ -12,6 +13,8 @@ namespace bot
 class BaseBidEvaluator : public BidEvaluator
 {
     private:
+    utils::Dealer dealer;
+
     BiddingParams estimateParams(const GameState& state, const utils::Position& position);
     utils::Bid getBidFromTable(const BiddingParams& params);
     ContractRequirements getRequirementsForBid(const utils::Bid& bid);

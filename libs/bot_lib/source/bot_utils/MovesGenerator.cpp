@@ -20,137 +20,145 @@ MoveGenerator::MoveGenerator()
     move_optimize_chain = std::make_unique<MergeSuccessingCards>();
 }
 
+void MoveGenerator::addToSuit(const GameState& state, std::vector<Move>& moves, const utils::Position& player)
+{
+    auto suit_int = static_cast<int>(state.trick_suit);
+    auto player_int = static_cast<int>(player);
+    bool has_in_suit = false;
+    for(int i = suit_int * 13; i < (suit_int * 13) + 13; i++)
+    {
+        if (state.player_cards_points[player_int][i] != 0)
+        {
+            moves.push_back(Move(i, player, state));
+            has_in_suit = true;
+        }
+    }
+    if(!has_in_suit) // player doesn't have trick suit, so he can play any other card
+    {
+        for(int i = 0; i<52; i++)
+        {
+            if (state.player_cards_points[player][i] != 0)
+            {
+                moves.push_back(Move(i, player, state));
+            }
+        }
+    }
+}
+
+void MoveGenerator::addStrictlyToSuit(const GameState& state, std::vector<Move>& moves, const utils::Position& player, utils::Suit suit)
+{
+    auto suit_int = static_cast<int>(suit);
+    auto player_int = static_cast<int>(player);
+    for(int i = suit_int * 13; i < (suit_int * 13) + 13; i++)
+    {
+        if (state.player_cards_points[player_int][i] != 0)
+        {
+            moves.push_back(Move(i, player, state));
+        }
+    }
+}
+
+void MoveGenerator::addAllTricker(const GameState& state, std::vector<Move>& moves, bool tricker_suits[4])
+{
+    for(int i = 0; i<52; i++)
+    {
+        if (state.player_cards_points[state.tricker][i] != 0)
+        {
+            moves.push_back(Move(i, state.tricker, state));
+            tricker_suits[i/13] = true;
+        }
+    }
+}
+
 std::vector<Move> MoveGenerator::generateMovesSet(const GameState& current_state, const GlobalGameState& global_state)
 {
-    // zrboić listę dostępnych ruchów dla tego, KTO TERAZ SIĘ RUSZA. Nie dla bota kurde.
-    // oczywiście w ujęciu pary
-    // pamiętać, żeby stan move.state_after był skopiowany !!!
     std::vector<Move> moves;
 
+    if(current_state.in_trick)
+    {
+        // we have to play to trick suit
+        auto moving_pair = utils::getEnemiesPositions(current_state.tricker);
+        addToSuit(current_state, moves, moving_pair.first);
+        addToSuit(current_state, moves, moving_pair.second);
+    } else
+    {
+        // we can set trick suit
+        bool tricker_suits[4]{false, false, false, false};
+        addAllTricker(current_state, moves, tricker_suits);
+        if(tricker_suits[0]) addStrictlyToSuit(current_state, moves, utils::getPartnerPosition(current_state.tricker), static_cast<utils::Suit>(0));
+        if(tricker_suits[1]) addStrictlyToSuit(current_state, moves, utils::getPartnerPosition(current_state.tricker), static_cast<utils::Suit>(1));
+        if(tricker_suits[2]) addStrictlyToSuit(current_state, moves, utils::getPartnerPosition(current_state.tricker), static_cast<utils::Suit>(2));
+        if(tricker_suits[3]) addStrictlyToSuit(current_state, moves, utils::getPartnerPosition(current_state.tricker), static_cast<utils::Suit>(3));
+    }
 
+    move_optimize_chain->handle(moves);
+
+    for(auto& move : moves)
+    {
+        updateStateAfterMove(move, global_state);
+    }
 
     return moves;
 }
 
+bool isNewCardHigher(int high_card, int card_placed, utils::Trump trump)
+{
+    if(card_placed / 13 == high_card / 13)  // same suit
+    {
+        return high_card > card_placed;
+    } else
+    {
+        if(card_placed / 13 == static_cast<int>(trump))
+            return true;
+        else
+            return false;
+    }
+}
+
 void MoveGenerator::updateStateAfterMove(Move& move, const GlobalGameState& global_state)
 {
-    updateCardPoints(move.state_after, move.placed_card, false);
-    bool bot_pair_move = (move.player_placed == global_state.bot_position || move.player_placed == global_state.bot_partner_posititon);
+    removeCardFromCardPointTables(move.state_after,  move.placed_card);
     if(move.state_after.in_trick)
     {
-
+        bool tricker_pair_won = isNewCardHigher(move.state_after.high_card, move.placed_card, global_state.contract.trump);
+        bool bot_pair_tricker = move.state_after.tricker == global_state.bot_position || move.state_after.tricker == global_state.bot_partner_posititon;
+        bool bot_pair_won = tricker_pair_won == bot_pair_tricker;
+        move.state_after.current_trick_no++;
+        move.state_after.game_end = move.state_after.current_trick_no == 13;
+        move.state_after.in_trick = false;
+        move.state_after.maximize = bot_pair_won;
+        move.state_after.pair_tricks_won += bot_pair_won ? 1 : 0;
+        move.state_after.tricker = tricker_pair_won ? move.state_after.placed_high_card : move.who_placed_card;
     } else
     {
         // trick start
         move.state_after.high_card = move.placed_card;
+        move.state_after.placed_high_card = move.who_placed_card;
         move.state_after.trick_suit = utils::getSuitFromIntCard(move.placed_card);
         move.state_after.in_trick = true;
-        move.state_after.maximize = !bot_pair_move;
+        move.state_after.maximize = move.state_after.tricker != global_state.bot_position && move.state_after.tricker != global_state.bot_partner_posititon;
     }
 }
 
-void MoveGenerator::updateCardPoints(GameState& state, int placed_card, bool check_trick_col)
+void MoveGenerator::removeCardFromCardPointTables(GameState& state, int placed_card)
 {
     for(int i = 0; i<4 ; i++)
     {
         state.player_cards_points[i][placed_card] = 0;
     }
-    if( check_trick_col && state.in_trick && state.trick_suit != utils::getSuitFromIntCard(placed_card))   // player does not have trick colour
+}
+
+void MoveGenerator::updateCurrentStateCards(GameState& state, const GlobalGameState& global_state, int placed_card)
+{
+    removeCardFromCardPointTables(state, placed_card);
+    if(state.in_trick && state.trick_suit != utils::getSuitFromIntCard(placed_card))   // player does not have trick suit at all
     {
         int trick_col = placed_card / 13;
         for(int i = trick_col * 13; i< (trick_col * 13) + 13; i++)
         {
-            state.player_cards_points[static_cast<int>(state.now_moving)][i] = 0;
+            state.player_cards_points[static_cast<int>(global_state.now_moving)][i] = 0;
         }
     }
 }
 
 } // namespace bot
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// do wywalenia
-// std::vector<Move> Bot::generateMoves(const GameState& state)
-// {
-//     std::vector<Move> moves = generateLegalMoves(state);
-//     move_optimize_chain->handle(moves);
-//     return moves;
-// }
-
-// std::vector<Move> Bot::generateLegalMoves(const GameState& state)
-// {
-//     return state.in_trick ? generateLegalMovesTrickContinue(state) : generateLegalMovesTrickStart(state);
-// }
-
-// std::vector<Move> Bot::generateLegalMovesTrickContinue(const GameState& state)
-// {
-//     std::vector<Move> moves;
-//     char first_suit_index = static_cast<char>(state.card_played_by_opponents.suit) * 13;
-//     for(char i = first_suit_index; i<first_suit_index + 13; i++)
-//     {
-//         if( state.player_cards_points[static_cast<int>(global_game_state.bot_position)][i] > 0 ||
-//             state.player_cards_points[static_cast<int>(global_game_state.bot_partner_posititon)][i] > 0)
-//         {
-//             moves.push_back(Move(i));
-//         }
-//     }
-
-//     if(moves.size() == 0)   // our pair does not have cards in this suit, so all others are allowed
-//     {
-//         for(int i = 0; i<52; i++)
-//         {
-//             if( state.player_cards_points[static_cast<int>(global_game_state.bot_position)][i] > 0 ||
-//             state.player_cards_points[static_cast<int>(global_game_state.bot_partner_posititon)][i] > 0)
-//             {
-//                 moves.push_back(Move(i));
-//             }
-//         }
-//     }
-//     return moves;
-// }
-
-// std::vector<Move> Bot::generateLegalMovesTrickStart(const GameState& state)
-// {
-//     std::vector<Move> moves;
-//     bool possessed_colors[] = {false, false, false, false};
-//     for(int i = 0; i<52; i++)
-//     {
-//         if( state.player_cards_points[static_cast<int>(global_game_state.bot_position)][i] > 0)
-//         {
-//             moves.push_back(Move(i));
-//             possessed_colors[i/13] = true;
-//         }
-//     }
-//     for(int j = 0; j<4; j++)
-//     {
-//         if(possessed_colors[j])
-//         {
-//             int start = 13 * j;
-//             for(int i = start; i< start + 13; i++)
-//             {
-//                 if( state.player_cards_points[static_cast<int>(global_game_state.bot_partner_posititon)][i] > 0)
-//                 {
-//                     moves.push_back(Move(i));
-//                 }
-//             }
-//         }
-//     }
-//     return moves;
-// }
-
-// void Bot::updateStateAfterMove(GameState& state, int played_card, const utils::Position& played_position)
-// {
-//     // adjust point in each player table
-//     for(int i = 0; i<4; i++)
-//     {
-//         current_state.player_cards_points[i][played_card] = 0;
-//     }
-//     if(state.in_trick && )
-// }
-
-// void Bot::generateStatesAfterEachMove(const std::vector<Move>& moves)
-// {
-//     for(auto move : moves)
-//     {
-//         updateStateAfterMove(move.state_after, move.placed_card, );
-//     }
-// }

@@ -14,6 +14,7 @@ struct GlobalGameState
     utils::Position bot_partner_posititon;
     utils::Bid contract;
     std::vector<utils::Bid> bidding;
+    utils::Position now_moving;
 };
 
 } // namespace bot
