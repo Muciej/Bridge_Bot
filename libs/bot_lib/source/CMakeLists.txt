@@ -6,6 +6,7 @@ set(SOURCES
     state_evaluator/BaseEvaluator.cpp
     bid_evaluator/BidEvaluator.cpp
     bot_utils/MovesGenerator.cpp
+    bot_utils/GameState.cpp
 )
 
 add_library(${BOT_LIB_NAME} ${SOURCES} ${HEADER_LIST})

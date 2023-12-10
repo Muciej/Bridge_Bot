@@ -22,7 +22,7 @@ class Bot
 {
     private:
     void init_current_state();
-    int evaluateNextMoveDetails(const GameState& state, int depth, int alpha, int beta, bool maximize);
+    int evaluateNextMoveDetails(GameState& state, int depth, int alpha, int beta, bool maximize);
 
     public:
     int evaluation_depth = 5;
@@ -39,9 +39,8 @@ class Bot
     void gameloop();
 
     // bot functions
-    utils::Card evaluateNextMove(const GameState& state);
-    utils::Bid evaluateNextBid(const GameState& state);
-    void resetPoints(utils::Position position);
+    utils::Card evaluateNextMove(GameState& state);
+    utils::Bid evaluateNextBid(GameState& state);
 
     // server interaction functions
     void executeSetPosCommand(std::vector<std::string> command_data);

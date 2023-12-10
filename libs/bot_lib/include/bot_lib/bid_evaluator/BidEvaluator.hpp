@@ -6,10 +6,12 @@
 namespace bot
 {
 
+const int REQUIRED_LEGAL_SAMPLES = 100;
+
 class BidEvaluator
 {
     public:
-    virtual utils::Bid evalueNextBid(const GameState& state, const GlobalGameState& globalState) = 0;
+    virtual utils::Bid evalueNextBid(GameState& state, const GlobalGameState& globalState) = 0;
 };
 
 

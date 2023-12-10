@@ -10,7 +10,7 @@ namespace bot
 class BaseBidEvaluator : public BidEvaluator
 {
     public:
-    utils::Bid evalueNextBid(const GameState& state, const GlobalGameState& globalState) override;
+    utils::Bid evalueNextBid(GameState& state, const GlobalGameState& globalState) override;
 };
 
 

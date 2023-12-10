@@ -18,4 +18,6 @@ struct GameState
     bool game_end = false;
 };
 
+void resetPoints(GameState& state, utils::Position position);
+
 } // namespace bot

@@ -53,12 +53,12 @@ void Bot::gameloop()
 
 }
 
-Card Bot::evaluateNextMove(const GameState& state)
+Card Bot::evaluateNextMove(GameState& state)
 {
     auto moves = move_generator.generateMovesSet(state, global_game_state);
     int max = std::numeric_limits<int>::min();
     int best_card_to_play;
-    for (const auto& move : moves)
+    for (auto& move : moves)
     {
         int eval = evaluateNextMoveDetails(move.state_after, evaluation_depth, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), true);
         if (eval > max)
@@ -69,7 +69,7 @@ Card Bot::evaluateNextMove(const GameState& state)
     return utils::getCardFromInt(best_card_to_play);
 }
 
-int Bot::evaluateNextMoveDetails(const GameState& state, int depth, int alpha, int beta, bool maximize)
+int Bot::evaluateNextMoveDetails(GameState& state, int depth, int alpha, int beta, bool maximize)
 {
     if( depth == 0 || state.game_end )
     {
@@ -82,7 +82,7 @@ int Bot::evaluateNextMoveDetails(const GameState& state, int depth, int alpha, i
     if ( maximize )
     {
         int maxEval = std::numeric_limits<int>::min();
-        for (const auto& move : moves)
+        for (auto& move : moves)
         {
             eval = evaluateNextMoveDetails(move.state_after, depth-1, alpha, beta, false);
             maxEval = std::max(eval, maxEval);
@@ -96,7 +96,7 @@ int Bot::evaluateNextMoveDetails(const GameState& state, int depth, int alpha, i
     } else
     {
         int minEval = std::numeric_limits<int>::max();
-        for (const auto& move : moves)
+        for (auto& move : moves)
         {
             eval = evaluateNextMoveDetails(move.state_after, depth-1, alpha, beta, move.state_after.maximize);
             minEval = std::min(eval, minEval);
@@ -109,7 +109,7 @@ int Bot::evaluateNextMoveDetails(const GameState& state, int depth, int alpha, i
     }
 }
 
-utils::Bid Bot::evaluateNextBid(const GameState& state)
+utils::Bid Bot::evaluateNextBid(GameState& state)
 {
     auto next_bid = bid_evaluator->evalueNextBid(state, global_game_state);
     //bid_evaluator->updateStateAfterBid(state, global_game_state)
@@ -120,7 +120,7 @@ void Bot::init_current_state()
 {
     for(int i = 0; i<4; i++)
     {
-        resetPoints(static_cast<utils::Position>(i));
+        resetPoints(current_state, static_cast<utils::Position>(i));
     }
 }
 
@@ -226,7 +226,7 @@ void Bot::executeDummyHandCommand(std::vector<std::string> command_data)
 {
     // adjust situation by adding dummy's card
     auto dummy_hand = commands::parseHandCommand(command_data, 2);
-    resetPoints(global_game_state.dummy_position);
+    resetPoints(current_state, global_game_state.dummy_position);
     for(const auto& card : dummy_hand)
     {
         current_state.player_cards_points[static_cast<int>(global_game_state.dummy_position)][utils::getCardAsInt(card)]++;
@@ -240,15 +240,5 @@ void Bot::executeGameendCommand(std::vector<std::string> command_data)
     current_state = GameState();
     init_current_state();
 }
-
-void Bot::resetPoints(utils::Position position)
-{
-    for(int i = 0; i<52; i++)
-    {
-        current_state.player_cards_points[static_cast<int>(position)][i] = 0;
-    }
-    current_state.player_cards_points_sum[static_cast<int>(position)] = 0;
-}
-
 
 } // namespace bot

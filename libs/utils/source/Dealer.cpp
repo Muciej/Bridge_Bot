@@ -40,4 +40,9 @@ std::vector<std::vector<Card>> Dealer::dealCards()
     return hands;
 }
 
+void dealCardsIntoIntTable(int hands[4][52])
+{
+
+}
+
 };

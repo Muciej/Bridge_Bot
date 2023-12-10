@@ -12,7 +12,7 @@ class MoveGenerator
     public:
     MoveGenerator();
     std::unique_ptr<MoveOptimizer> move_optimize_chain;
-    std::vector<Move> generateMovesSet(const GameState& current_state, const GlobalGameState& global_state);
+    std::vector<Move> generateMovesSet(GameState& current_state, const GlobalGameState& global_state);
 
 };
 

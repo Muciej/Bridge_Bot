@@ -15,6 +15,7 @@ class Dealer
     Dealer();
     void shuffleDeck();
     std::vector<std::vector<Card>> dealCards();
+    void dealCardsIntoIntTable(int hands[4][52]);
 };
 
 };
