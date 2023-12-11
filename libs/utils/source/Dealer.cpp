@@ -41,11 +41,12 @@ std::vector<std::vector<Card>> Dealer::dealCards()
     return hands;
 }
 
-void Dealer::dealCardsIntoIntTable(std::vector<int>& deal)
+void Dealer::dealCardsIntoIntTable(std::vector<int>& deal, const std::vector<int>& bot_cards)
 {
     for(const auto& card : deck)
     {
-        deal.push_back(utils::getCardAsInt(card));
+        if(std::find(bot_cards.begin(), bot_cards.end(), card) == bot_cards.end())
+            deal.push_back(utils::getCardAsInt(card));
     }
 }
 

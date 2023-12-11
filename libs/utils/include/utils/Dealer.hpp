@@ -15,7 +15,7 @@ class Dealer
     Dealer();
     void shuffleDeck();
     std::vector<std::vector<Card>> dealCards();
-    void dealCardsIntoIntTable(std::vector<int>& deal);
+    void dealCardsIntoIntTable(std::vector<int>& deal, const std::vector<int>& bot_cards);
 };
 
 };

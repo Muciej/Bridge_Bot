@@ -19,7 +19,6 @@ Bot::Bot(std::string bot_name, ClientPtr client_ptr) : client(std::move(client_p
     global_game_state.bot_name = bot_name;
     state_evaluator = std::make_unique<BaseEvaluator>();
     bid_evaluator = std::make_unique<BaseBidEvaluator>();
-    init_current_state();
 }
 
 void Bot::gameloop()
@@ -135,7 +134,16 @@ void Bot::init_current_state()
 {
     for(int i = 0; i<4; i++)
     {
-        resetPoints(current_state, static_cast<utils::Position>(i));
+        if(i == static_cast<int>(global_game_state.bot_position))
+        {
+            resetPoints(current_state, static_cast<utils::Position>(i));
+        } else
+        {
+            for(int j = 0; j<52; j++)
+            {
+                current_state.player_cards_points[i][j] = REQUIRED_LEGAL_SAMPLES / 13;
+            }
+        }
     }
 }
 
@@ -148,6 +156,7 @@ void Bot::executeSetPosCommand(std::vector<std::string> command_data)
     {
         global_game_state.bot_position = commands::getPositionFromString(command_data[2]);
         global_game_state.bot_partner_posititon = utils::getPartnerPosition(global_game_state.bot_position);
+        init_current_state();
     }
 }
 
@@ -159,6 +168,7 @@ void Bot::executeHandCommand(std::vector<std::string> command_data)
     auto hand = commands::parseHandCommand(command_data, 2);
     for(const auto& card : hand)
     {
+        move_generator.removeCardFromCardPointTables(current_state, utils::getCardAsInt(card));
         current_state.player_cards_points[static_cast<int>(global_game_state.bot_position)][utils::getCardAsInt(card)] = REQUIRED_LEGAL_SAMPLES;
     }
 }

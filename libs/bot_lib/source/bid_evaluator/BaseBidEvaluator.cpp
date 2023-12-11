@@ -19,10 +19,13 @@ void BaseBidEvaluator::updateAfterPlacedBid(GameState& state, const GlobalGameSt
         return;
     }
 
-    const auto& placed_bid = *global_state.bidding.end();
+    const auto& placed_bid = global_state.bidding.back();
+    if (placed_bid.trump == utils::Trump::PASS) // pass does not provide any new information
+        return;
+
     BiddingParams north_pair;
     BiddingParams west_pair;
-    if(global_state.now_moving == utils::Position::NORTH || global_state.now_moving == utils::Position::NORTH)
+    if(global_state.now_moving == utils::Position::NORTH || global_state.now_moving == utils::Position::SOUTH)
     {
         north_pair = getEstimatedParamsFromContractRequirements(getRequirementsForBid(placed_bid), placed_bid.trump);
         west_pair = estimateParams(state, utils::Position::WEST);
@@ -34,18 +37,29 @@ void BaseBidEvaluator::updateAfterPlacedBid(GameState& state, const GlobalGameSt
 
     for(int i = 0; i<4; i++)
     {
-        resetPoints(state, static_cast<utils::Position>(i));
+        if(i != static_cast<int>(global_state.bot_position))
+            resetPoints(state, static_cast<utils::Position>(i));
+    }
+
+    std::vector<int> bot_cards;
+    bot_cards.reserve(13);
+    for(int i = 0; i<52; i++)
+    {
+        if( state.player_cards_points[static_cast<int>(global_state.bot_position)][i] > 0)
+        {
+            bot_cards.push_back(i);
+        }
     }
 
     int legal_samples = 0;
     while(legal_samples < REQUIRED_LEGAL_SAMPLES)
     {
         std::vector<int> deal;
-        dealer.dealCardsIntoIntTable(deal);
+        dealer.dealCardsIntoIntTable(deal, bot_cards);
         dealer.shuffleDeck();
         if (checkDealWithEstimate(deal, north_pair, west_pair))
         {
-            giveCardsPoints(deal, state);
+            giveCardsPoints(deal, state, global_state.bot_position);
             legal_samples++;
         }
     }
@@ -186,40 +200,49 @@ BiddingParams BaseBidEvaluator::getEstimatedParamsFromContractRequirements(const
     return params;
 }
 
-std::pair<BiddingParams, BiddingParams> BaseBidEvaluator::getParamsFromDeal(const std::vector<int>& deal)
+void getParamsFromDealDetails(const std::vector<int>& card_table, int start_ind, BiddingParams& current)
+{
+    utils::Card c;
+    for(int j = 0; j < 13; j++)
+    {
+        c = utils::getCardFromInt(card_table[start_ind + j]);
+        switch (c.suit)
+        {
+        case utils::Suit::CLUBS:
+            current.clubs_points += std::max(c.rank-10, 0);
+            current.clubs_cards++;
+            break;
+        case utils::Suit::DIAMONDS:
+            current.diamonds_points += std::max(c.rank-10, 0);
+            current.diamonds_cards++;
+            break;
+        case utils::Suit::HEARTS:
+            current.hearts_points += std::max(c.rank-10, 0);
+            current.hearts_cards++;
+            break;
+        case utils::Suit::SPADES:
+            current.spades_points += std::max(c.rank-10, 0);
+            current.spades_cards++;
+            break;
+        default:
+            break;
+        }
+        current.all_points += std::max(c.rank-10, 0);
+    }
+}
+
+std::pair<BiddingParams, BiddingParams> BaseBidEvaluator::getParamsFromDeal(const std::vector<int>& deal, const std::vector<int>& bot_cards, const utils::Position& bot_position)
 {
     BiddingParams north_pair, west_pair;
-    utils::Card c;
-    for(int i = 0; i<4; i++)
+    auto position = utils::getNextPosition(bot_position);
+    for(int i = 0; i<3; i++)
     {
-        BiddingParams& current = i%2 == 0 ? north_pair : west_pair;
-        for(int j = 0; j < 13; j++)
-        {
-            c = utils::getCardFromInt(deal[(13*i) + j]);
-            switch (c.suit)
-            {
-            case utils::Suit::CLUBS:
-                current.clubs_points += std::max(c.rank-10, 0);
-                current.clubs_cards++;
-                break;
-            case utils::Suit::DIAMONDS:
-                current.diamonds_points += std::max(c.rank-10, 0);
-                current.diamonds_cards++;
-                break;
-            case utils::Suit::HEARTS:
-                current.hearts_points += std::max(c.rank-10, 0);
-                current.hearts_cards++;
-                break;
-            case utils::Suit::SPADES:
-                current.spades_points += std::max(c.rank-10, 0);
-                current.spades_cards++;
-                break;
-            default:
-                break;
-            }
-            current.all_points += std::max(c.rank-10, 0);
-        }
+        BiddingParams& current = static_cast<int>(position)%2 == 0 ? north_pair : west_pair;
+        getParamsFromDealDetails(deal, i*13, current);
+        position = utils::getNextPosition(position);
     }
+    BiddingParams& current = static_cast<int>(bot_position)%2 == 0 ? north_pair : west_pair;
+    getParamsFromDealDetails(bot_cards, 0, current);
     return {north_pair, west_pair};
 }
 
@@ -229,14 +252,16 @@ bool BaseBidEvaluator::checkDealWithEstimate(const std::vector<int>& deal, const
     return params_pair.first < pairNorth && params_pair.second < pairWest;
 }
 
-void BaseBidEvaluator::giveCardsPoints(const std::vector<int>& deal, GameState& state)
+void BaseBidEvaluator::giveCardsPoints(const std::vector<int>& deal, GameState& state, const utils::Position& bot_position)
 {
-    for(int i = 0; i<4; i++)
+    auto position = utils::getNextPosition(bot_position);
+    for(int i = 0; i<3; i++)
     {
         for(int j = 0; j<13; j++)
         {
-            state.player_cards_points[i][deal[(i * 13) + j]]++;
+            state.player_cards_points[static_cast<int>(position)][deal[(i * 13) + j]]++;
         }
+        position = utils::getNextPosition(position);
     }
 }
 
