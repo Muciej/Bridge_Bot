@@ -7,6 +7,7 @@ namespace bot
 
 class MergeRepeatingCards : public MoveOptimizer
 {
+    public:
     void handle(std::vector<Move>& moves) override;
 };
 

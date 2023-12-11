@@ -24,6 +24,10 @@ namespace bot
             {
                 present[i] = false;
             }
+            if(present[i] && first_in_row)
+            {
+                first_in_row = false;
+            }
         }
         for(const auto& move : moves)
         {

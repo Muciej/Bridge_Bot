@@ -18,5 +18,6 @@ struct Move
     Move(int card, const utils::Position pos, const GameState& state) : placed_card(card), who_placed_card(pos), state_after(state) {};
 };
 
+bool operator==(const Move& lhs, const Move& rhs);
 
 } // namespace bot

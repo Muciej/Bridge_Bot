@@ -7,6 +7,7 @@
 #include <bot_lib/Bot.hpp>
 #include <connection/FakeClient.hpp>
 #include <utils/Card.hpp>
+#include <bot_lib/bid_evaluator/BidEvaluator.hpp>
 
 using bot::Bot;
 using utils::Card;
@@ -85,7 +86,7 @@ TEST(BotTest, HandCommandShouldReactTest)
     {
         if (std::find(example_hand_int_values.begin(), example_hand_int_values.end(), j) != example_hand_int_values.end())
         {
-            EXPECT_EQ(bot.current_state.player_cards_points[2][j], 1);
+            EXPECT_EQ(bot.current_state.player_cards_points[2][j], bot::REQUIRED_LEGAL_SAMPLES);
         } else
         {
             EXPECT_EQ(bot.current_state.player_cards_points[2][j], 0);

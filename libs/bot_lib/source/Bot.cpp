@@ -187,11 +187,8 @@ void Bot::executeBidendCommand(std::vector<std::string> command_data)
 
 void Bot::executePlayCommand(std::vector<std::string> command_data)
 {
-    // adjust current situation accordingly
-    // check if it's bot move now
     auto card_played = commands::parsePlayCommand(command_data);
-    // updateStateAfterMove(current_state, card_played, current_state.now_moving);
-    // move_generator.updateStateAfterMove(state, global_game_state);
+    move_generator.removeCardFromCardPointTables(current_state, utils::getCardAsInt(card_played));
     global_game_state.now_moving = utils::getNextPosition(global_game_state.now_moving);
     if( global_game_state.now_moving == global_game_state.bot_position)
     {
@@ -230,7 +227,7 @@ void Bot::executeDummyHandCommand(std::vector<std::string> command_data)
     }
 }
 
-void Bot::executeGameendCommand(std::vector<std::string> command_data)
+void Bot::executeGameendCommand(__attribute_maybe_unused__ std::vector<std::string> command_data)
 {
     global_game_state = GlobalGameState();
     current_state = GameState();
