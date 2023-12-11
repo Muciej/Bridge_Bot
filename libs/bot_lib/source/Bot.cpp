@@ -227,7 +227,7 @@ void Bot::executeDummyHandCommand(std::vector<std::string> command_data)
     }
 }
 
-void Bot::executeGameendCommand(__attribute_maybe_unused__ std::vector<std::string> command_data)
+void Bot::executeGameendCommand( std::vector<std::string> command_data)
 {
     global_game_state = GlobalGameState();
     current_state = GameState();

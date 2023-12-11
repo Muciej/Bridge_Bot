@@ -3,7 +3,7 @@
 namespace connection
 {
 
-bool FakeClient::startConnection(__attribute_maybe_unused__ const std::string& host, __attribute_maybe_unused__ const in_port_t& port)
+bool FakeClient::startConnection( const std::string& host,  const in_port_t& port)
 {
     return true;
 }

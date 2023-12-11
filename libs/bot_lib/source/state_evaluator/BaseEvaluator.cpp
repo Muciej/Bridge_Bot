@@ -9,12 +9,14 @@ int BaseEvaluator::evaluateState(const GameState& state, const GlobalGameState& 
     for(int i = 0; i<4; i++)
     {
         int multiplier = i == static_cast<int>(global_state.bot_position) ? ALLY_POINT_MULTIPLIER : ENEMY_POINT_MULTIPLIER;
+        float cards_prob[52];
+        getCardProbability(state, cards_prob, static_cast<utils::Position>(i));
         for(int j = 0; j<=39; j+=13)
         {
-            evaluation += multiplier * state.player_cards_points[i][j+9];
-            evaluation += multiplier * 2 * state.player_cards_points[i][j+10];
-            evaluation += multiplier * 3 * state.player_cards_points[i][j+11];
-            evaluation += multiplier * 4 * state.player_cards_points[i][j+12];
+            evaluation += multiplier * static_cast<int>(cards_prob[j+9]);
+            evaluation += multiplier * static_cast<int>(2.0 * cards_prob[j+10]);
+            evaluation += multiplier * static_cast<int>(3.0 * cards_prob[j+11]);
+            evaluation += multiplier * static_cast<int>(4.0 * cards_prob[j+12]);
         }
     }
     return evaluation;
