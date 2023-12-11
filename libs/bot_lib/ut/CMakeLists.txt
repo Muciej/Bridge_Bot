@@ -5,6 +5,7 @@ set(EXEC_NAME ut_${BOT_LIB_NAME})
 set(SOURCES
     testBot.cpp
     testMoveOptimizers.cpp
+    testStateEvaluator.cpp
 )
 
 add_executable(${EXEC_NAME} ${SOURCES})
