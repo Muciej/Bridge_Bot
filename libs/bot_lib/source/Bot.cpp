@@ -50,7 +50,17 @@ void Bot::gameloop()
         else if( type == "DUMMY_HAND")
             executeDummyHandCommand(command_data);
     }
+}
 
+int getLowestBotMove(const std::vector<Move>& moves, const GlobalGameState global_state)
+{
+    int lowest = 64;;
+    for(const auto& move : moves)
+    {
+        if(move.who_placed_card == global_state.bot_position && move.placed_card % 13 < lowest % 13)
+            lowest = move.placed_card;
+    }
+    return lowest;
 }
 
 Card Bot::evaluateNextMove(GameState& state)
@@ -58,13 +68,19 @@ Card Bot::evaluateNextMove(GameState& state)
     auto moves = move_generator.generateMovesSet(state, global_game_state);
     int max = std::numeric_limits<int>::min();
     int best_card_to_play;
+    bool is_it_bot_card;
     for (const auto& move : moves)
     {
         int eval = evaluateNextMoveDetails(move.state_after, evaluation_depth, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), true);
         if (eval > max)
         {
             best_card_to_play = move.placed_card;
+            is_it_bot_card = move.who_placed_card == global_game_state.bot_position;
         }
+    }
+    if(!is_it_bot_card)
+    {
+        best_card_to_play = getLowestBotMove(moves, global_game_state);
     }
     return utils::getCardFromInt(best_card_to_play);
 }
