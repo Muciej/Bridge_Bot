@@ -57,7 +57,7 @@ void BaseBidEvaluator::updateAfterPlacedBid(GameState& state, const GlobalGameSt
         std::vector<int> deal;
         dealer.dealCardsIntoIntTable(deal, bot_cards);
         dealer.shuffleDeck();
-        if (checkDealWithEstimate(deal, north_pair, west_pair))
+        if (checkDealWithEstimate(deal, bot_cards, north_pair, west_pair, global_state.bot_position))
         {
             giveCardsPoints(deal, state, global_state.bot_position);
             legal_samples++;
@@ -246,9 +246,9 @@ std::pair<BiddingParams, BiddingParams> BaseBidEvaluator::getParamsFromDeal(cons
     return {north_pair, west_pair};
 }
 
-bool BaseBidEvaluator::checkDealWithEstimate(const std::vector<int>& deal, const BiddingParams& pairNorth, const BiddingParams& pairWest)
+bool BaseBidEvaluator::checkDealWithEstimate(const std::vector<int>& deal, const std::vector<int>& bot_cards, const BiddingParams& pairNorth, const BiddingParams& pairWest, const utils::Position& bot_position)
 {
-    auto params_pair = getParamsFromDeal(deal);
+    auto params_pair = getParamsFromDeal(deal, bot_cards, bot_position);
     return params_pair.first < pairNorth && params_pair.second < pairWest;
 }
 

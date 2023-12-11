@@ -45,8 +45,9 @@ void Dealer::dealCardsIntoIntTable(std::vector<int>& deal, const std::vector<int
 {
     for(const auto& card : deck)
     {
-        if(std::find(bot_cards.begin(), bot_cards.end(), card) == bot_cards.end())
-            deal.push_back(utils::getCardAsInt(card));
+        int card_int = utils::getCardAsInt(card);
+        if(std::find(bot_cards.begin(), bot_cards.end(), card_int) == bot_cards.end())
+            deal.push_back(card_int);
     }
 }
 

@@ -20,7 +20,7 @@ class BaseBidEvaluator : public BidEvaluator
     ContractRequirements getRequirementsForBid(const utils::Bid& bid);
     BiddingParams getEstimatedParamsFromContractRequirements(const ContractRequirements& requirements, const utils::Trump& trump);
     std::pair<BiddingParams, BiddingParams> getParamsFromDeal(const std::vector<int>& deal, const std::vector<int>& bot_cards, const utils::Position& bot_position);
-    bool checkDealWithEstimate(const std::vector<int>& deal, const BiddingParams& pairNorth, const BiddingParams& pairWest);
+    bool checkDealWithEstimate(const std::vector<int>& deal, const std::vector<int>& bot_cards, const BiddingParams& pairNorth, const BiddingParams& pairWest, const utils::Position& bot_position);
     void giveCardsPoints(const std::vector<int>& deal, GameState& state, const utils::Position& bot_position);
 
     public:
