@@ -5,16 +5,28 @@
 #include <connection/TcpServer.hpp>
 #include <commands/QueueContainer.hpp>
 
-int main(){  
+int main(int argc, char* argv[]){
+
+    int port = 12345;
+    bool print_info = true;
+
+    if(argc > 2)
+    {
+        print_info = argv[2] == "y" ? true : false;
+    }
+    if(argc > 1)
+    {
+        port = std::atoi(argv[1]);
+    }
 
     auto server_ptr = std::make_unique<connection::TcpServer>(std::make_unique<QueueContainer>(), std::make_unique<QueueContainer>());
 
-    server_ptr->startListening(12345);
+    server_ptr->startListening(port);
     std::cout << "Bridge game server started " << std::endl
               << "waiting for players..." << std::endl;
 
     game::GameManager manager(std::move(server_ptr));
-    manager.shouldPrintInfo = true;
+    manager.shouldPrintInfo = print_info;
     manager.gameLoop();
 
     return 0;

@@ -25,7 +25,7 @@ class Bot
     int evaluateNextMoveDetails(const GameState& state, int depth, int alpha, int beta, bool maximize);
 
     public:
-    int evaluation_depth = 5;
+    const int evaluation_depth = 5;
     GameState current_state;
     GlobalGameState global_game_state;
     ClientPtr client;

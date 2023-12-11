@@ -6,11 +6,17 @@
 #include <connection/TcpClient.hpp>
 #include <connection/Client.hpp>
 
-int main(){
+int main(int argc, char* argv[]){
+    int port = 12345;
+
+    if(argc > 1)
+    {
+        port = std::atoi(argv[1]);
+    }
 
     std::cout << "Bot" << std::endl;
     auto clientPtr = std::make_unique<connection::TcpClient>(std::make_unique<QueueContainer>(), std::make_unique<QueueContainer>());
-    clientPtr->startConnection("localhost", 12345);
+    clientPtr->startConnection("localhost", port);
     std::string name;
     std::cin >> name;
     bot::Bot bot(name, std::move(clientPtr));
