@@ -70,7 +70,7 @@ void estimatePoints(float cards_prob_1[52], float cards_prob_2[52], BiddingParam
     float color_points[]{0.0, 0.0, 0.0, 0.0};
     for(int i = 0; i < 4; i++)
     {
-        color_points[i] += cards_prob_1[(13 * i) + 9] + cards_prob_2[(13 * i) + 9];      // JACK
+        color_points[i] += cards_prob_1[(13 * i) + 9] + cards_prob_2[(13 * i) + 9];              // JACK
         color_points[i] += 2.0 * (cards_prob_1[(13 * i) + 10] + cards_prob_2[(13 * i) + 10]);    // QUEEN
         color_points[i] += 3.0 * (cards_prob_1[(13 * i) + 11] + cards_prob_2[(13 * i) + 11]);    // KING
         color_points[i] += 4.0 * (cards_prob_1[(13 * i) + 12] + cards_prob_2[(13 * i) + 12]);    // ACE
@@ -249,7 +249,7 @@ std::pair<BiddingParams, BiddingParams> BaseBidEvaluator::getParamsFromDeal(cons
 bool BaseBidEvaluator::checkDealWithEstimate(const std::vector<int>& deal, const std::vector<int>& bot_cards, const BiddingParams& pairNorth, const BiddingParams& pairWest, const utils::Position& bot_position)
 {
     auto params_pair = getParamsFromDeal(deal, bot_cards, bot_position);
-    return params_pair.first < pairNorth && params_pair.second < pairWest;
+    return pairNorth < params_pair.first  &&  pairWest < params_pair.second;
 }
 
 void BaseBidEvaluator::giveCardsPoints(const std::vector<int>& deal, GameState& state, const utils::Position& bot_position)
