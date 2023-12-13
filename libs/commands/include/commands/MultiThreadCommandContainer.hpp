@@ -2,6 +2,8 @@
 #include <mutex>
 #include <string>
 
+
+/// @brief Interface for container supporting multithreaded use
 class MultiThreadCommandContainer
 {
     public:

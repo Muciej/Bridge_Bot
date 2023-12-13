@@ -5,6 +5,8 @@
 namespace bot
 {
 
+/// @brief Class used to store data about game state
+/// it stores data that is constant during whole game
 struct GlobalGameState
 {
     std::string bot_name;

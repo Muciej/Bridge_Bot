@@ -5,6 +5,8 @@
 namespace bot
 {
 
+/// @brief Class used to store data about game state
+/// it stores data that can change within move or bid
 struct GameState
 {
     utils::Position tricker;

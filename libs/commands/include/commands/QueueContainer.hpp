@@ -3,6 +3,8 @@
 #include <queue>
 #include <string>
 
+/// @brief Queue that encapsulates std::queue
+/// to enable support for multithreaded use
 class QueueContainer : public MultiThreadCommandContainer
 {
     private:

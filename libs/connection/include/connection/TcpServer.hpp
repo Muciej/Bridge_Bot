@@ -10,6 +10,8 @@
 namespace connection
 {
 
+
+/// @brief TCP implementation of Server interface
 class TcpServer : public Server
 {
     private:
