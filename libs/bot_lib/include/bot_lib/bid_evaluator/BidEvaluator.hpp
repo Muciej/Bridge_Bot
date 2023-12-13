@@ -13,6 +13,8 @@ using utils::Trump;
 
 const int REQUIRED_LEGAL_SAMPLES = 100;
 
+/// @brief Data structure used to store information
+/// about cards
 struct BiddingParams
 {
     char all_points = 0;

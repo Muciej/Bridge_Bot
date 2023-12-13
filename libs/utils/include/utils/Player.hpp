@@ -15,11 +15,21 @@ enum Position
     WEST = 3
 };
 
+/// @brief Returns position of player's partner
+/// @param pos - player position
 Position getPartnerPosition(const Position& pos);
+
+/// @brief Returns std::pair containing position of enemies
+/// @param pos - position of player whom enemies we want
 std::pair<Position, Position> getEnemiesPositions(const Position& pos);
+
+/// @brief Returns previous position (counter-clockwise)
 Position getPrevPosition(const Position& pos);
+
+/// @brief Returns next position clockwise
 Position getNextPosition(const Position& pos);
 
+/// @brief Object used to store informations about player
 class Player
 {
     public:

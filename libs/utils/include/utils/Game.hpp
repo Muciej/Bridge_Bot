@@ -15,6 +15,7 @@ enum class GameState
     END,
 };
 
+
 struct Game
 {
     GameState state = GameState::IN_LOBBY;
@@ -26,8 +27,16 @@ struct Game
     int dealer_won_tricks = 0;
     bool dummy_card_revealed = false;
 
+    /// @brief Returns currently played trick
+    /// @return currently played trick copy
     Trick getCurentTrick();
+
+
+    /// @brief Returns score of the game
     int getScore();
+
+
+    /// @brief Returns pair with positions of winners
     std::pair<Position, Position> getWinners();
 };
 

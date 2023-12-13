@@ -21,7 +21,13 @@ class Bidding
     bool addBid(const Position& pos, const Bid& bid);
     bool isBiddingEnded();
     void clear();
+
+    /// @brief Returns declarer - that is player from winner pair, 
+    /// who first proposed the trump
+    /// @return position of declarer
     std::optional<Position> getDeclarer();
+
+    /// @brief Returns contract established during bidding
     std::optional<Bid> getContract();
 };
 
