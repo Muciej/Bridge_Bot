@@ -12,7 +12,8 @@ int main(int argc, char* argv[]){
 
     if(argc > 2)
     {
-        print_info = argv[2] == "y" ? true : false;
+        std::string yes = "y";
+        print_info = yes.compare(argv[2]) ? true : false;
     }
     if(argc > 1)
     {
