@@ -11,7 +11,7 @@ namespace bot
 using utils::Bid;
 using utils::Trump;
 
-const int REQUIRED_LEGAL_SAMPLES = 128;
+const int REQUIRED_LEGAL_SAMPLES = 32;
 
 /// @brief Data structure used to store information
 /// about cards

@@ -54,17 +54,35 @@ void Bot::gameloop()
 
 int getLowestMove(const std::vector<Move>& moves, const GlobalGameState& global_state, const utils::Position& position)
 {
-    int lowest = 64;;
+    int lowest = 64;
     for(const auto& move : moves)
     {
-        if(move.who_placed_card == position && move.placed_card % 13 < lowest % 13)
+        if(move.who_placed_card == position && (move.placed_card % 13 < lowest % 13))
             lowest = move.placed_card;
     }
     return lowest;
 }
 
+int getLowestSuit(const GameState& state, const utils::Position& position, const utils::Suit& suit)
+{
+    int suit_int = static_cast<int>(suit);
+    int pos_ind = static_cast<int>(position);
+
+    for(int i = 13 * suit_int; i < (13 * suit_int) + 13; i++)
+    {
+        if( state.player_cards_points[pos_ind][i] > 0 )
+            return i;
+    }
+
+    return 0;
+}
+
 Card Bot::evaluateNextMove(GameState& state)
 {
+    if( state.in_trick && global_game_state.now_moving == global_game_state.bot_partner_posititon )
+    {
+        state.in_trick = false;
+    }
     auto moves = move_generator.generateMovesSet(state, global_game_state);
     int max = std::numeric_limits<int>::min();
     int best_card_to_play;
@@ -79,13 +97,18 @@ Card Bot::evaluateNextMove(GameState& state)
         }
     }
 
+    std::cout << "Before checks: " << utils::getCardFromInt(best_card_to_play) << "\t" << who_s_card << std::endl;
+
     if(who_s_card != global_game_state.bot_position && global_game_state.now_moving == global_game_state.bot_position)
     {
-        best_card_to_play = getLowestMove(moves, global_game_state, global_game_state.bot_position);
+        // best_card_to_play = getLowestMove(moves, global_game_state, global_game_state.bot_position);
+        best_card_to_play = getLowestSuit(state, global_game_state.bot_position, utils::getSuitFromIntCard(best_card_to_play));
     } else if (who_s_card == global_game_state.bot_position && global_game_state.declarer_pos == global_game_state.bot_position && global_game_state.now_moving == global_game_state.dummy_position)
     {
-        best_card_to_play = getLowestMove(moves, global_game_state, global_game_state.dummy_position);
+        // best_card_to_play = getLowestMove(moves, global_game_state, global_game_state.dummy_position);
+        best_card_to_play = getLowestSuit(state, global_game_state.dummy_position, utils::getSuitFromIntCard(best_card_to_play));
     }
+    std::cout << "After checks: " << utils::getCardFromInt(best_card_to_play) << "\t" << who_s_card << std::endl << std::endl;
     return utils::getCardFromInt(best_card_to_play);
 }
 
