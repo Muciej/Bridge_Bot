@@ -2,6 +2,7 @@
 #include <bot_lib/moves_optimizations/MergeSuccessingCards.hpp>
 #include <utils/Card.hpp>
 #include <utils/CardsUtils.hpp>
+#include <iostream>
 
 namespace bot
 {
@@ -70,6 +71,15 @@ void MoveGenerator::addAllTricker(const GameState& state, std::vector<Move>& mov
     }
 }
 
+void debugPrintMoveSet(const std::vector<Move>& moves)
+{
+    std::cout << std::endl;
+    for(const auto& move : moves)
+    {
+        std::cout << move.placed_card << "\t" << move.who_placed_card << std::endl;
+    }
+}
+
 std::vector<Move> MoveGenerator::generateMovesSet(const GameState& current_state, const GlobalGameState& global_state)
 {
     std::vector<Move> moves;
@@ -79,20 +89,24 @@ std::vector<Move> MoveGenerator::generateMovesSet(const GameState& current_state
         // we have to play to trick suit
         auto moving_pair = utils::getEnemiesPositions(current_state.tricker);
         addToSuit(current_state, moves, moving_pair.first);
+        debugPrintMoveSet(moves);
         addToSuit(current_state, moves, moving_pair.second);
+        debugPrintMoveSet(moves);
     } else
     {
         // we can set trick suit
         bool tricker_suits[4]{false, false, false, false};
         addAllTricker(current_state, moves, tricker_suits);
+        debugPrintMoveSet(moves);
         if(tricker_suits[0]) addStrictlyToSuit(current_state, moves, utils::getPartnerPosition(current_state.tricker), static_cast<utils::Suit>(0));
         if(tricker_suits[1]) addStrictlyToSuit(current_state, moves, utils::getPartnerPosition(current_state.tricker), static_cast<utils::Suit>(1));
         if(tricker_suits[2]) addStrictlyToSuit(current_state, moves, utils::getPartnerPosition(current_state.tricker), static_cast<utils::Suit>(2));
         if(tricker_suits[3]) addStrictlyToSuit(current_state, moves, utils::getPartnerPosition(current_state.tricker), static_cast<utils::Suit>(3));
+        debugPrintMoveSet(moves);
     }
 
     move_optimize_chain->handle(moves);
-
+    debugPrintMoveSet(moves);
     for(auto& move : moves)
     {
         updateStateAfterMove(move, global_state);

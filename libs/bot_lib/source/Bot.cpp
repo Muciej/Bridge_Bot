@@ -4,6 +4,7 @@
 #include <bot_lib/Bot.hpp>
 #include <utils/Card.hpp>
 #include <utils/CardsUtils.hpp>
+#include <utils/Printer.hpp>
 
 #include <commands/CommandsUtils.hpp>
 #include <bot_lib/state_evaluator/BaseEvaluator.hpp>
@@ -51,12 +52,12 @@ void Bot::gameloop()
     }
 }
 
-int getLowestBotMove(const std::vector<Move>& moves, const GlobalGameState global_state)
+int getLowestMove(const std::vector<Move>& moves, const GlobalGameState& global_state, const utils::Position& position)
 {
     int lowest = 64;;
     for(const auto& move : moves)
     {
-        if(move.who_placed_card == global_state.bot_position && move.placed_card % 13 < lowest % 13)
+        if(move.who_placed_card == position && move.placed_card % 13 < lowest % 13)
             lowest = move.placed_card;
     }
     return lowest;
@@ -67,19 +68,23 @@ Card Bot::evaluateNextMove(GameState& state)
     auto moves = move_generator.generateMovesSet(state, global_game_state);
     int max = std::numeric_limits<int>::min();
     int best_card_to_play;
-    bool is_it_bot_card;
+    utils::Position who_s_card;
     for (const auto& move : moves)
     {
         int eval = evaluateNextMoveDetails(move.state_after, evaluation_depth, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), true);
         if (eval > max)
         {
             best_card_to_play = move.placed_card;
-            is_it_bot_card = move.who_placed_card == global_game_state.bot_position;
+            who_s_card = move.who_placed_card;
         }
     }
-    if(!is_it_bot_card)
+
+    if(who_s_card != global_game_state.bot_position && global_game_state.now_moving == global_game_state.bot_position)
     {
-        best_card_to_play = getLowestBotMove(moves, global_game_state);
+        best_card_to_play = getLowestMove(moves, global_game_state, global_game_state.bot_position);
+    } else if (who_s_card == global_game_state.bot_position && global_game_state.declarer_pos == global_game_state.bot_position && global_game_state.now_moving == global_game_state.dummy_position)
+    {
+        best_card_to_play = getLowestMove(moves, global_game_state, global_game_state.dummy_position);
     }
     return utils::getCardFromInt(best_card_to_play);
 }
@@ -119,7 +124,6 @@ int Bot::evaluateNextMoveDetails(const GameState& state, int depth, int alpha, i
             if (beta <= alpha)
                 break;
         }
-
         return minEval;
     }
 }
@@ -141,7 +145,7 @@ void Bot::init_current_state()
         {
             for(int j = 0; j<52; j++)
             {
-                current_state.player_cards_points[i][j] = REQUIRED_LEGAL_SAMPLES / 13;
+                current_state.player_cards_points[i][j] = REQUIRED_LEGAL_SAMPLES / 4;
             }
         }
     }
@@ -166,6 +170,7 @@ void Bot::executeHandCommand(std::vector<std::string> command_data)
         return;
 
     auto hand = commands::parseHandCommand(command_data, 2);
+    std::cout << printer::printSortedHand(hand) << std::endl;
     for(const auto& card : hand)
     {
         move_generator.removeCardFromCardPointTables(current_state, utils::getCardAsInt(card));
@@ -191,7 +196,7 @@ void Bot::executeBidCommand(std::vector<std::string> command_data)
     global_game_state.bidding.push_back(bid);
     bid_evaluator->updateAfterPlacedBid(current_state, global_game_state);
     global_game_state.now_moving = utils::getNextPosition(global_game_state.now_moving);
-    if(global_game_state.now_moving == global_game_state.bot_position)
+    if(global_game_state.now_moving == global_game_state.bot_position && !bot::isBiddingEnded(global_game_state.bidding))
     {
         auto bot_bid = evaluateNextBid(current_state);
         client->sendCommand(command_creator.getBidInfoCommand(global_game_state.bot_position, bot_bid));
@@ -202,8 +207,10 @@ void Bot::executeBidendCommand(std::vector<std::string> command_data)
 {
     global_game_state.declarer_pos = commands::getPositionFromString(command_data[1]);
     global_game_state.dummy_position = utils::getPartnerPosition(global_game_state.declarer_pos);
-    global_game_state.now_moving = global_game_state.declarer_pos;
+    global_game_state.now_moving = utils::getNextPosition(global_game_state.declarer_pos);
     global_game_state.contract = commands::parseBidCommand(command_data);
+    current_state.current_trick_no = 1;
+    current_state.tricker = global_game_state.now_moving;
     if( global_game_state.now_moving == global_game_state.bot_position)
     {
         auto card = evaluateNextMove(current_state);
@@ -220,6 +227,11 @@ void Bot::executePlayCommand(std::vector<std::string> command_data)
     {
         auto card = evaluateNextMove(current_state);
         client->sendCommand(command_creator.getPlayCommand(global_game_state.bot_position, card));
+    }
+    if( global_game_state.declarer_pos == global_game_state.bot_position && global_game_state.now_moving == global_game_state.dummy_position)
+    {
+        auto card = evaluateNextMove(current_state);
+        client->sendCommand(command_creator.clientGetDummyPlayCommand(global_game_state.bot_position, card));
     }
 }
 
@@ -239,6 +251,11 @@ void Bot::executeTrickendCommand(std::vector<std::string> command_data)
     {
         auto card = evaluateNextMove(current_state);
         client->sendCommand(command_creator.getPlayCommand(global_game_state.bot_position, card));
+    }
+    if( global_game_state.declarer_pos == global_game_state.bot_position && global_game_state.now_moving == global_game_state.dummy_position)
+    {
+        auto card = evaluateNextMove(current_state);
+        client->sendCommand(command_creator.clientGetDummyPlayCommand(global_game_state.bot_position, card));
     }
 }
 

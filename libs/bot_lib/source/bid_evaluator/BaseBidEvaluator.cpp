@@ -1,3 +1,4 @@
+#include <cmath>
 #include <bot_lib/bid_evaluator/BaseBidEvaluator.hpp>
 #include <utils/Player.hpp>
 #include <utils/Card.hpp>
@@ -9,7 +10,8 @@ namespace bot
 utils::Bid BaseBidEvaluator::evalueNextBid(const GameState& state, const GlobalGameState& globalState)
 {
     auto ally_params = estimateParams(state, globalState.bot_position);
-    return getBidFromTable(ally_params);
+    auto bid = getBidFromTable(ally_params);
+    return checkBidLegal(bid, globalState) ? bid : Bid(utils::Trump::PASS, 0);
 }
 
 void BaseBidEvaluator::updateAfterPlacedBid(GameState& state, const GlobalGameState& global_state)
@@ -75,11 +77,11 @@ void estimatePoints(float cards_prob_1[52], float cards_prob_2[52], BiddingParam
         color_points[i] += 3.0 * (cards_prob_1[(13 * i) + 11] + cards_prob_2[(13 * i) + 11]);    // KING
         color_points[i] += 4.0 * (cards_prob_1[(13 * i) + 12] + cards_prob_2[(13 * i) + 12]);    // ACE
     }
-    params.clubs_points = static_cast<char>(color_points[0]);
-    params.diamonds_points = static_cast<char>(color_points[1]);
-    params.hearts_points = static_cast<char>(color_points[2]);
-    params.spades_points = static_cast<char>(color_points[3]);
-    params.all_points = static_cast<char>(color_points[0] + color_points[1] + color_points[2] + color_points[3]);
+    params.clubs_points = static_cast<char>(std::roundl(color_points[0]));
+    params.diamonds_points = static_cast<char>(std::roundl(color_points[1]));
+    params.hearts_points = static_cast<char>(std::roundl(color_points[2]));
+    params.spades_points = static_cast<char>(std::roundl(color_points[3]));
+    params.all_points = static_cast<char>(std::roundl(color_points[0] + color_points[1] + color_points[2] + color_points[3]));
 }
 
 void estimateLength(float cards_prob_1[52], float cards_prob_2[52], BiddingParams& params)
@@ -161,8 +163,6 @@ utils::Bid BaseBidEvaluator::getBidFromTable(const BiddingParams& params)
     {
         if(compareRequirementWithParams(params, pair.second, pair.first.trump))
             bid = pair.first;
-        else
-            break;
     }
     return bid;
 }
@@ -248,8 +248,8 @@ std::pair<BiddingParams, BiddingParams> BaseBidEvaluator::getParamsFromDeal(cons
 
 bool BaseBidEvaluator::checkDealWithEstimate(const std::vector<int>& deal, const std::vector<int>& bot_cards, const BiddingParams& pairNorth, const BiddingParams& pairWest, const utils::Position& bot_position)
 {
-    auto params_pair = getParamsFromDeal(deal, bot_cards, bot_position);
-    return pairNorth < params_pair.first  &&  pairWest < params_pair.second;
+    const auto params_pair = getParamsFromDeal(deal, bot_cards, bot_position);
+    return pairNorth <= params_pair.first  &&  pairWest <= params_pair.second;
 }
 
 void BaseBidEvaluator::giveCardsPoints(const std::vector<int>& deal, GameState& state, const utils::Position& bot_position)
@@ -265,19 +265,23 @@ void BaseBidEvaluator::giveCardsPoints(const std::vector<int>& deal, GameState& 
     }
 }
 
-bool operator<(const BiddingParams& b1, const BiddingParams& b2)
+bool operator<=(const BiddingParams& b1, const BiddingParams& b2)
 {
-    bool is_ok = true;
-    if( b1.all_points >= b2.all_points) is_ok = false;
-    if( b1.clubs_cards >= b2.clubs_cards) is_ok = false;
-    if( b1.clubs_points >= b2.clubs_points) is_ok = false;
-    if( b1.diamonds_cards >= b2.diamonds_cards) is_ok = false;
-    if( b1.diamonds_points >= b2.diamonds_points) is_ok = false;
-    if( b1.hearts_cards >= b2.hearts_cards) is_ok = false;
-    if( b1.hearts_points >= b2.hearts_points) is_ok = false;
-    if( b1.spades_cards >= b2.spades_cards) is_ok = false;
-    if( b1.spades_points >= b2.spades_points) is_ok = false;
-    return is_ok;
+    if( b1.all_points > b2.all_points) return false;
+    if( b1.clubs_cards > b2.clubs_cards) return false;
+    if( b1.clubs_points > b2.clubs_points) return false;
+    if( b1.diamonds_cards > b2.diamonds_cards) return false;
+    if( b1.diamonds_points > b2.diamonds_points) return false;
+    if( b1.hearts_cards > b2.hearts_cards) return false;
+    if( b1.hearts_points > b2.hearts_points) return false;
+    if( b1.spades_cards > b2.spades_cards) return false;
+    if( b1.spades_points > b2.spades_points) return false;
+    return true;
+}
+
+bool BaseBidEvaluator::checkBidLegal(const utils::Bid& bid, const GlobalGameState& globalState)
+{
+    return bid > bot::getHighestBid(globalState.bidding);
 }
 
 } // namespace bot

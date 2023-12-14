@@ -22,6 +22,7 @@ class BaseBidEvaluator : public BidEvaluator
     std::pair<BiddingParams, BiddingParams> getParamsFromDeal(const std::vector<int>& deal, const std::vector<int>& bot_cards, const utils::Position& bot_position);
     bool checkDealWithEstimate(const std::vector<int>& deal, const std::vector<int>& bot_cards, const BiddingParams& pairNorth, const BiddingParams& pairWest, const utils::Position& bot_position);
     void giveCardsPoints(const std::vector<int>& deal, GameState& state, const utils::Position& bot_position);
+    bool checkBidLegal(const utils::Bid& bid, const GlobalGameState& globalState);
 
     public:
     utils::Bid evalueNextBid(const GameState& state, const GlobalGameState& globalState) override;

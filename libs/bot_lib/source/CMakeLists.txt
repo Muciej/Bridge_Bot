@@ -9,6 +9,7 @@ set(SOURCES
     bot_utils/MovesGenerator.cpp
     bot_utils/GameState.cpp
     bot_utils/Move.cpp
+    bot_utils/GlobalGameState.cpp
 )
 
 add_library(${BOT_LIB_NAME} ${SOURCES} ${HEADER_LIST})

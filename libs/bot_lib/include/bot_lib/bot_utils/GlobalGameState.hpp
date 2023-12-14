@@ -19,4 +19,7 @@ struct GlobalGameState
     utils::Position now_moving;
 };
 
+utils::Bid getHighestBid(const std::vector<utils::Bid>& bidding_history);
+bool isBiddingEnded(const std::vector<utils::Bid>& bidding_history);
+
 } // namespace bot

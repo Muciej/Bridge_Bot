@@ -11,7 +11,7 @@ namespace bot
 using utils::Bid;
 using utils::Trump;
 
-const int REQUIRED_LEGAL_SAMPLES = 100;
+const int REQUIRED_LEGAL_SAMPLES = 8;
 
 /// @brief Data structure used to store information
 /// about cards
@@ -28,7 +28,7 @@ struct BiddingParams
     char clubs_cards = 0;
 };
 
-bool operator<(const BiddingParams& b1, const BiddingParams& b2);
+bool operator<=(const BiddingParams& b1, const BiddingParams& b2);
 
 struct ContractRequirements
 {
