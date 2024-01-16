@@ -1,6 +1,7 @@
 #include <limits>
 #include <vector>
 #include <algorithm>
+#include <thread>
 #include <bot_lib/Bot.hpp>
 #include <utils/Card.hpp>
 #include <utils/CardsUtils.hpp>
@@ -24,13 +25,18 @@ Bot::Bot(std::string bot_name, ClientPtr client_ptr) : client(std::move(client_p
 
 void Bot::gameloop()
 {
+    using namespace std::chrono_literals;
     client->sendCommand("ADD_PLAYER " + global_game_state.bot_name + " BOT");
     std::string server_command;
     std::vector<std::string> command_data;
     while(true)
     {
+        std::this_thread::sleep_for(300ms);
         server_command = client->popCommandWait();
+        std::this_thread::sleep_for(300ms);
         auto type = commands::parseCommand(server_command, command_data);
+        if (is_dummy && type != "GAMEEND")
+            continue;
         if( type == "SETPOS")
             executeSetPosCommand(command_data);
         else if( type == "HAND")
@@ -79,11 +85,7 @@ int getLowestSuit(const GameState& state, const utils::Position& position, const
 
 Card Bot::evaluateNextMove(GameState& state)
 {
-    if( state.in_trick && global_game_state.now_moving == global_game_state.bot_partner_posititon )
-    {
-        state.in_trick = false;
-    }
-    auto moves = move_generator.generateMovesSet(state, global_game_state);
+    auto moves = move_generator.generateInitialMovesSet(state, global_game_state);
     int max = std::numeric_limits<int>::min();
     int best_card_to_play;
     utils::Position who_s_card;
@@ -239,6 +241,11 @@ void Bot::executeBidendCommand(std::vector<std::string> command_data)
     global_game_state.contract = commands::parseBidCommand(command_data);
     current_state.current_trick_no = 1;
     current_state.tricker = global_game_state.now_moving;
+    if(global_game_state.dummy_position == global_game_state.bot_position)
+    {
+        is_dummy = true;
+        return;
+    }
     if( global_game_state.now_moving == global_game_state.bot_position)
     {
         auto card = evaluateNextMove(current_state);
@@ -310,6 +317,7 @@ void Bot::executeGameendCommand( std::vector<std::string> command_data)
 {
     global_game_state = GlobalGameState();
     current_state = GameState();
+    is_dummy = false;
     init_current_state();
 }
 

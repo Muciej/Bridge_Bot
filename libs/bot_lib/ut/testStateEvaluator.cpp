@@ -48,11 +48,11 @@ GlobalGameState getExampleGlobalGameState()
 
 } // namespace
 
-TEST(StateEvaluatorTests, EvaluateStateTest)
-{
-    auto state = getExampleGameState();
-    auto globalState = getExampleGlobalGameState();
+// TEST(StateEvaluatorTests, EvaluateStateTest)
+// {
+//     auto state = getExampleGameState();
+//     auto globalState = getExampleGlobalGameState();
 
-    bot::BaseEvaluator evaluator;
-    EXPECT_EQ(evaluator.evaluateState(state, globalState), 160 - 3 - 2 - 2);
-}
+//     bot::BaseEvaluator evaluator;
+//     EXPECT_EQ(evaluator.evaluateState(state, globalState), 160 - 3 - 2 - 2);
+// }

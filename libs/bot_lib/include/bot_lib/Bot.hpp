@@ -21,8 +21,8 @@ using ClientPtr = std::unique_ptr<connection::Client>;
 class Bot
 {
     private:
-    void init_current_state();
     int evaluateNextMoveDetails(const GameState& state, int depth, int alpha, int beta, bool maximize);
+    bool is_dummy = false;
 
     public:
     const int evaluation_depth = 5;
@@ -41,6 +41,7 @@ class Bot
     // bot functions
     utils::Card evaluateNextMove(GameState& state);
     utils::Bid evaluateNextBid(GameState& state);
+    void init_current_state();
 
     // server interaction functions
     void executeSetPosCommand(std::vector<std::string> command_data);

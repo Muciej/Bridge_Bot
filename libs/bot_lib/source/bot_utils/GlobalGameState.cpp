@@ -7,6 +7,8 @@ namespace bot
 utils::Bid getHighestBid(const std::vector<utils::Bid>& bidding_history)
 {
     auto biggest = utils::Bid(utils::Trump::PASS, 0);
+    if(bidding_history.size() == 0)
+        return biggest;
     for(auto it = bidding_history.end()-1; it >= bidding_history.begin(); it--)
     {
         if (*it > biggest)

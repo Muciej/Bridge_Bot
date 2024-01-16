@@ -54,13 +54,17 @@ TEST(BotTest, HandCommandShouldNotReactTest)
     auto client_ptr = std::make_unique<connection::FakeClient>();
     Bot bot("Bot_test", std::move(client_ptr));
     bot.global_game_state.bot_position = utils::Position::NORTH;
+    bot.init_current_state();
 
     bot.executeHandCommand(example_hand_command_south);
     for(int i = 0; i<4; i++)
     {
         for(int j = 0; j<52; j++)
         {
-            EXPECT_EQ(bot.current_state.player_cards_points[i][j], 0);
+            if(i == 0)
+                EXPECT_EQ(bot.current_state.player_cards_points[i][j], 0);
+            else
+                EXPECT_EQ(bot.current_state.player_cards_points[i][j], bot::REQUIRED_LEGAL_SAMPLES/4);
         }
     }
 }
@@ -70,6 +74,7 @@ TEST(BotTest, HandCommandShouldReactTest)
     auto client_ptr = std::make_unique<connection::FakeClient>();
     Bot bot("Bot_test", std::move(client_ptr));
     bot.global_game_state.bot_position = utils::Position::SOUTH;
+    bot.init_current_state();
 
     bot.executeHandCommand(example_hand_command_south);
     for(int i = 0; i<4; i++)
@@ -79,7 +84,10 @@ TEST(BotTest, HandCommandShouldReactTest)
 
         for(int j = 0; j<52; j++)
         {
-            EXPECT_EQ(bot.current_state.player_cards_points[i][j], 0);
+            if(std::find(example_hand_int_values.begin(), example_hand_int_values.end(), j) != example_hand_int_values.end())
+                EXPECT_EQ(bot.current_state.player_cards_points[i][j], 0);
+            else
+                EXPECT_EQ(bot.current_state.player_cards_points[i][j], bot::REQUIRED_LEGAL_SAMPLES/4);
         }
     }
     for(int j = 0; j < 52; j++)

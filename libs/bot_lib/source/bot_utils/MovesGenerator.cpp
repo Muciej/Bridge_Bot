@@ -3,6 +3,8 @@
 #include <utils/Card.hpp>
 #include <utils/CardsUtils.hpp>
 #include <iostream>
+#include <exception>
+#include <assert.h>
 
 namespace bot
 {
@@ -102,6 +104,7 @@ std::vector<Move> MoveGenerator::generateMovesSet(const GameState& current_state
     }
 
     move_optimize_chain->handle(moves);
+
     for(auto& move : moves)
     {
         updateStateAfterMove(move, global_state);
@@ -169,5 +172,112 @@ void MoveGenerator::updateCurrentStateCards(GameState& state, const GlobalGameSt
         }
     }
 }
+
+// std::vector<Move> MoveGenerator::generateMovesTwo(const GameState& current_state, const GlobalGameState& global_state)
+// {
+//     // second in trick, first in pair (either moving itself or dummy)
+//     assert(current_state.in_trick && global_state.bot_position != global_state.dummy_position);
+//     std::vector<Move> moves;
+//     addToSuit(current_state, moves, global_state.now_moving);
+//     move_optimize_chain->handle(moves);
+//     for(auto& move: moves)
+//     {
+//         removeCardFromCardPointTables(move.state_after,  move.placed_card);
+//         if(isNewCardHigher(move.state_after.high_card, move.placed_card, global_state.contract.trump))
+//         {
+//             move.state_after.high_card = move.placed_card;
+//             move.state_after.placed_high_card = move.who_placed_card;
+//         }
+//         move.state_after.maximize = false;
+//     }
+
+//     return moves;
+// }
+
+std::vector<Move> MoveGenerator::generateMovesThree(const GameState& current_state, const GlobalGameState& global_state)
+{
+    // third in trick, second in pair, maybe dummy -> have to play to color
+    assert(current_state.in_trick && global_state.bot_position != global_state.dummy_position);
+    std::vector<Move> moves;
+    addToSuit(current_state, moves, global_state.now_moving);
+    move_optimize_chain->handle(moves);
+    for(auto& move: moves)
+    {
+        removeCardFromCardPointTables(move.state_after,  move.placed_card);
+        if(isNewCardHigher(move.state_after.high_card, move.placed_card, global_state.contract.trump))
+        {
+            move.state_after.high_card = move.placed_card;
+            move.state_after.placed_high_card = move.who_placed_card;
+
+        }
+        bool bot_pair_won = move.state_after.placed_high_card == global_state.bot_position || move.state_after.placed_high_card == global_state.bot_position;
+        utils::Position winner = move.state_after.placed_high_card;
+        move.state_after.maximize = bot_pair_won;
+        move.state_after.pair_tricks_won += bot_pair_won ? 1 : 0;
+        move.state_after.in_trick = false;
+        move.state_after.current_trick_no++;
+        move.state_after.game_end = move.state_after.current_trick_no == 13;
+        move.state_after.tricker = winner;
+    }
+
+    return moves;
+}
+
+std::vector<Move> MoveGenerator::generateMovesFour(const GameState& current_state, const GlobalGameState& global_state)
+{
+    // fourth in trick, second in pair, maybe dummy, ending trick
+    assert(current_state.in_trick && global_state.bot_position != global_state.dummy_position);
+    std::vector<Move> moves;
+    addToSuit(current_state, moves, global_state.now_moving);
+    move_optimize_chain->handle(moves);
+    for(auto& move: moves)
+    {
+        removeCardFromCardPointTables(move.state_after,  move.placed_card);
+        if(isNewCardHigher(move.state_after.high_card, move.placed_card, global_state.contract.trump))
+        {
+            move.state_after.high_card = move.placed_card;
+            move.state_after.placed_high_card = move.who_placed_card;
+
+        }
+        bool bot_pair_won = move.state_after.placed_high_card == global_state.bot_position || move.state_after.placed_high_card == global_state.bot_position;
+        utils::Position winner = move.state_after.placed_high_card;
+        move.state_after.maximize = bot_pair_won;
+        move.state_after.pair_tricks_won += bot_pair_won ? 1 : 0;
+        move.state_after.in_trick = false;
+        move.state_after.current_trick_no++;
+        move.state_after.game_end = move.state_after.current_trick_no == 13;
+        move.state_after.tricker = winner;
+    }
+
+    return moves;
+
+}
+
+std::vector<Move> MoveGenerator::generateInitialMovesSet(const GameState& current_state, const GlobalGameState& global_state)
+{
+    int turnNumber = getTurnNumber(current_state, global_state.now_moving);
+
+    switch (turnNumber)
+    {
+    case 1: //starting round
+        assert(!current_state.in_trick);
+        return generateMovesSet(current_state, global_state);
+    case 2:
+        assert(current_state.in_trick);
+        return generateMovesSet(current_state, global_state);
+    case 3:
+        return generateMovesThree(current_state, global_state);
+    case 4:
+        return generateMovesFour(current_state, global_state);
+    default:
+        throw std::range_error("Invalid turn number");
+    }
+}
+
+int MoveGenerator::getTurnNumber(const GameState& state, const utils::Position& moving)
+{
+    return (static_cast<int>(moving) - static_cast<int>(state.tricker) + 4)%4 + 1;
+}
+
 
 } // namespace bot

@@ -6,6 +6,7 @@ set(SOURCES
     testBot.cpp
     testMoveOptimizers.cpp
     testStateEvaluator.cpp
+    testMoveGenerator.cpp
 )
 
 add_executable(${EXEC_NAME} ${SOURCES})

@@ -82,6 +82,8 @@ void TcpServer::allClientSender()
         lock.unlock();
         for(auto it = clients_write_sockets.begin(); it != clients_write_sockets.end(); it++)
         {
+            using namespace std::chrono_literals;
+            std::this_thread::sleep_for(200ms);
             if(it->write(command) != (int) command.length())
             {
                 it->close();
